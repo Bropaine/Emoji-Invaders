@@ -2,7 +2,13 @@ const scoreEl = document.querySelector('#scoreEl');
 const levelEl = document.querySelector('#levelEl');
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
-
+let music = new Howl({
+    src: ['./assets/spaceInvadersLevelOne.wav'],
+    autoplay: true,
+    loop: true
+  });
+  let mute = false;
+  
 canvas.width = 1024;
 canvas.height = 576;
 
@@ -162,6 +168,7 @@ class Projectile {
             this.draw();
             this.position.x += velocity.x;
             this.position.y += velocity.y;
+            
         }
     }
     
@@ -219,6 +226,7 @@ class Grid {
         const rows = Math.floor(Math.random() * 5 + 2);
 
         this.width = columns * 30;
+        this.height = rows * 30;
 
         for  (let x = 0; x < columns; x++) {
             for (let y = 0; y < rows; y++){
@@ -232,7 +240,7 @@ class Grid {
         }
        // console.log(this.invaders);
     }
-
+    
     update() {
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
@@ -242,12 +250,56 @@ class Grid {
         if (this.position.x + this.width >= canvas.width || this.position.x <= 0) {
             this.velocity.x = -this.velocity.x;
             this.velocity.y = 30;
-        }
-
+            
     }
+    if (this.position.y + this.height >= canvas.height){
+        setTimeout(() => {
+            player.opacity = 0;
+            game.over = true;
+            }, 0);
+           
+            setTimeout(() => {
+               
+              game.active = false;
+              }, 2000);
+}
+    
+  }
+}
+
+class EndGame {
+    constructor() {
+
+        const image = new Image();
+        image.src = './assets/gameover.png'
+        image.onload = () => {
+        this.image = image;
+        //Shrink image and maintain the aspect ratio
+        const scale = 0.25;
+        this.width = image.width * scale;
+        this.height = image.height * scale;
+        this.opacity = 1;
+        this.position = {
+            x: canvas.width / 2 - this.width / 2,
+            y: canvas.height / 2 - this.height / 2
+        }
+        }
+    }
+
+    draw() {
+      
+       c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+       
+    }
+
+    update() {
+            this.draw();
+    }
+       
 }
 
 const player = new Player();
+const endGame = new EndGame();
 const projectiles = [];
 const grids = [];
 const invaderProjectiles = [];
@@ -326,29 +378,37 @@ function createParticles({object, color, fades}) {
 }
 
 function animate() {
-    if (!game.active) return;
-
+    
+    if (!game.active) {
+        music.stop();
+        endGame.update();
+        return;
+    } 
+    if (!music.playing()) {
+        music.play();
+    }
     //level Progression
+    console.log(game.over);
     if (score <= 5000) {
         ProjectileVelocity = 1;
         enemySpeed = 1;
-        enemySpawn  = 2000;
+        enemySpawn  = 1500;
     } else if (score > 5000 && score <= 12000) {
         ProjectileVelocity = 2;
         enemySpeed = 1.5;
-        enemySpawn  = 2000;
+        enemySpawn  = 1500;
         level = 2;
         levelEl.innerHTML = level;
     } else if (score > 12000 && score <= 20000) {
         ProjectileVelocity = 2;
         enemySpeed = 2;
-        enemySpawn  = 1500;
+        enemySpawn  = 1000;
         level = 3;
         levelEl.innerHTML = level;
     } else if (score > 20000 && score <= 30000) {
         ProjectileVelocity = 3;
         enemySpeed = 2.5;
-        enemySpawn  = 1500;
+        enemySpawn  = 1000;
         level = 4;
         levelEl.innerHTML = level;
     } else if (score > 30000 && score <= 50000) {
@@ -370,6 +430,7 @@ function animate() {
     c.fillStyle = 'black';
     c.fillRect(0, 0, canvas.width, canvas.height);
     player.update();
+   
     particles.forEach((particle, i) => {
         if (particle.position.y - particle.radius >= canvas.height) {
             particle.position.x = Math.random() * canvas.width;
@@ -422,7 +483,8 @@ function animate() {
         projectile.update();
         }
     })
-
+   
+    
     grids.forEach((grid, gridIndex) => {
         grid.update();
         //spawn projectiles
@@ -431,7 +493,8 @@ function animate() {
          }
         grid.invaders.forEach((invader, i) => {
             invader.update({velocity: grid.velocity});
-            //collision detection and enmey removal
+           
+            //collision detection and enemy removal
             //projectiles hit enemy
             projectiles.forEach((projectile, j) => {
                 if (projectile.position.y - projectile.radius <= invader.position.y + invader.height && projectile.position.x + projectile.radius //
@@ -454,22 +517,26 @@ function animate() {
                                 object: invader,
                                 fades: true
                              });
-                          grid.invaders.splice(i, 1);
-                          projectiles.splice(j, 1);
+                            grid.invaders.splice(i, 1);
+                            projectiles.splice(j, 1);
 
-                          if (grid.invaders.length > 0) {
-                            const firstInvader = grid.invaders[0];
-                            const lastInvader = grid.invaders[grid.invaders.length - 1];
+                            if (grid.invaders.length > 0) {
+                                const firstInvader = grid.invaders[0];
+                                const lastInvader = grid.invaders[grid.invaders.length - 1];
                             
-                            grid.width = lastInvader.position.x - firstInvader.position.x + lastInvader.width;
-                            grid.position.x = firstInvader.position.x;
+                                grid.width = lastInvader.position.x - firstInvader.position.x + lastInvader.width;
+                                grid.position.y = firstInvader.position.y;
+                                grid.position.x = firstInvader.position.x;
+                               
                           } else {
                             grids.splice(gridIndex, 1)
                           }
+                          
                         }
                     }, 0)
                 }
             })
+            
         })
     })
     //player movement and canvas boundry
@@ -502,7 +569,7 @@ function animate() {
         randomInterval = Math.floor((Math.random() * enemySpawn) + 1000);
         frames = 0;
     }
-
+    
     frames++;
 }
 
