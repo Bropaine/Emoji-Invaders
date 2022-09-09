@@ -7,6 +7,13 @@ let music = new Howl({
     autoplay: true,
     loop: true
   });
+
+  let music02 = new Howl({
+    src: ['./assets/sounds/spaceInvaders02.wav'],
+    autoplay: true,
+    loop: true
+  });
+
   let laserSound = new Howl({
     src: ['./assets/sounds/laser01.wav'],
     autoplay: true,
@@ -24,6 +31,8 @@ class Player {
             x: 0,
             y: 0
         }
+
+        
 
         const image = new Image();
         image.src = './assets/spaceship.png'
@@ -140,7 +149,7 @@ class Projectile {
 
         const image = new Image();
         
-        image.src = './assets/invader.png'
+        image.src = enemySprite;
        
         image.onload = () => {
         this.image = image;
@@ -228,19 +237,20 @@ class Grid {
         }
 
         this.invaders = [];
-
+        //this.image = enemySprite;
+        
         const columns = Math.floor(Math.random() * 10 + 5);
         const rows = Math.floor(Math.random() * 5 + 2);
 
-        this.width = columns * 30;
-        this.height = (rows + 1) * 30;
+        this.width = columns * enemyWidth;
+        this.height = (rows + 1) * enemyHeight;
 
         for  (let x = 0; x < columns; x++) {
             for (let y = 0; y < rows; y++){
                 this.invaders.push(new Invader({
                     position: {
-                      x: x * 30,
-                      y: y * 30
+                      x: x * enemyWidth,
+                      y: y * enemyHeight
                    }
                 }))
             }
@@ -356,6 +366,9 @@ const keys = {
     },
     space: {
         pressed: false
+    },
+    Capslock: {
+        pressed: false
     }
 
 }
@@ -367,7 +380,9 @@ let game = {
     active: true
 }
 
-
+let enemySprite = './assets/redinvader.png';
+let enemyWidth = 30;
+let enemyHeight = 30;
 let score = 0;
 let level = 1;
 let playerProjectileColor = '#ff462e';
@@ -377,6 +392,7 @@ let enemySpawn  = 0;
 let speed = 4;
 let enemyLaserColor = 'white';
 let starColor = 'white';
+let particleColor = '#BAA0DE';
 let executed = false;
 
 
@@ -395,7 +411,7 @@ function createParticles({object, color, fades, num}) {
                y: (Math.random() - 0.5) * 2
            },
            radius: Math.random() * 3,
-           color: color || '#BAA0DE',
+           color: color,
            fades: fades
 
        }))
@@ -436,12 +452,11 @@ function animate() {
     
     if (!game.active) {
         music.stop();
+        music02.stop();
         endGame.update();
         return;
     } 
-    if (!music.playing()) {
-        music.play();
-    }
+   
     //level Progression
     console.log();
     if (score <= 5000) {
@@ -449,10 +464,14 @@ function animate() {
         enemySpeed = 1;
         enemySpawn  = 1500;
         enemyLaserColor = 'yellow';
+        enemySprite = './assets/invader.png';
         if (!executed){
             starColor ='white';
             stars(starColor, 75);
             executed = true;
+        }
+        if (!music.playing() && !music02.playing()) {
+            music.play();
         }
         
     } else if (score > 5000 && score <= 12000) {
@@ -462,6 +481,11 @@ function animate() {
         level = 2;
         levelEl.innerHTML = level;
         enemyLaserColor = 'yellow';
+        if (executed){
+            starColor ='white';
+            stars(starColor, 25);
+            executed = false;
+        }
         
     } else if (score > 12000 && score <= 20000) {
         ProjectileVelocity = 2;
@@ -470,18 +494,30 @@ function animate() {
         level = 3;
         levelEl.innerHTML = level;
         enemyLaserColor = 'yellow';
-        if (executed){
+        if (!executed){
             starColor ='#8f5cd1';
             stars(starColor, 50);
-            executed = false;
+            executed = true;
         }
+        if (!music02.playing()) {
+            music.stop();
+            music02.play();
+        }
+       
     } else if (score > 20000 && score <= 30000) {
         ProjectileVelocity = 3;
         enemySpeed = 2.5;
         enemySpawn  = 1000;
         level = 4;
         levelEl.innerHTML = level;
-        enemyLaserColor = 'yellow';
+        enemySprite = './assets/greenInvader.png';
+        particleColor = 'green';
+        enemyLaserColor = 'orange';
+        if (executed){
+            starColor ='#e3b354';
+            stars(starColor, 30);
+            executed = false;
+        }
         
     } else if (score > 30000 && score <= 50000) {
         ProjectileVelocity = 3;
@@ -489,19 +525,19 @@ function animate() {
         enemySpawn  = 1000;
         level = 5;
         levelEl.innerHTML = level;
-        enemyLaserColor = 'green';
-        if (!executed){
-            starColor ='#e3b354';
-            stars(starColor, 30);
-            executed = true;
-        }
+        enemyLaserColor = 'orange';
+        particleColor = 'green'
+       
+       
     } else if (score > 50000 && score <= 75000) {
         ProjectileVelocity = 4;
         enemySpeed = 4;
         enemySpawn  = 500;
         level = 6;
         levelEl.innerHTML = level;
-        enemyLaserColor = 'green';
+        enemyLaserColor = 'orange';
+        particleColor = 'green'
+       
         
     } else if (score > 75000 && score <= 100000) {
         ProjectileVelocity = 4;
@@ -510,10 +546,12 @@ function animate() {
         level = 7;
         levelEl.innerHTML = level;
         enemyLaserColor = 'green';
-        if (executed){
+        enemySprite = './assets/redInvader.png';
+        particleColor = 'red'
+        if (!executed){
             starColor ='#e3b354';
             stars(starColor, 25);
-            executed = false;
+            executed = true;
         }
     }
     else if (score > 100000 && score <= 150000) {
@@ -522,7 +560,8 @@ function animate() {
         enemySpawn  = 500;
         level = 8;
         levelEl.innerHTML = level;
-        enemyLaserColor = 'red';
+        particleColor = 'red';
+        enemyLaserColor = 'green';
         
     } else if (score > 150000 && score <= 200000) {
         ProjectileVelocity = 5;
@@ -530,7 +569,8 @@ function animate() {
         enemySpawn  = 250;
         level = 9;
         levelEl.innerHTML = level;
-        enemyLaserColor = 'red';
+        particleColor = 'red';
+        enemyLaserColor = 'green';
        
     } else if (score > 200000) {
         ProjectileVelocity = 6;
@@ -538,11 +578,15 @@ function animate() {
         enemySpawn  = 250;
         level = 10;
         levelEl.innerHTML = level;
-        enemyLaserColor = 'red';
-        if (!executed){
+        enemySprite = './assets/motherShip.png';
+        enemyHeight = 30;
+        enemyWidth = 63;
+        particleColor = 'red';
+        enemyLaserColor = 'purple';
+        if (executed){
             starColor ='#c70000';
             stars(starColor, 50);
-            executed = true;
+            executed = false;
         }
     }
    
@@ -637,6 +681,7 @@ function animate() {
                             scoreEl.innerHTML = score;
                              createParticles({
                                 object: invader,
+                                color: particleColor ,
                                 fades: true,
                                 num: 15
                              });
@@ -701,10 +746,10 @@ animate();
 
 addEventListener('keydown', ({key}) =>  {
     if (game.over) return;
-
+    console.log(key);
     switch (key) {
 
-        case 'a':
+        case 'a':    
             console.log('left');
             keys.a.pressed = true;
             break;
@@ -719,7 +764,23 @@ addEventListener('keydown', ({key}) =>  {
         case 's':
             console.log('down');
             keys.s.pressed = true;
-             break;         
+             break;      
+        case 'A':    
+             console.log('left');
+             keys.a.pressed = true;
+             break;
+         case 'W':
+             console.log('up');
+             keys.w.pressed = true;
+              break;    
+         case 'D':
+             console.log('right');
+             keys.d.pressed = true;
+              break;    
+         case 'S':
+             console.log('down');
+             keys.s.pressed = true;
+              break;                 
         case ' ':
             console.log('space');
           if (!keys.space.pressed){
@@ -744,7 +805,8 @@ addEventListener('keydown', ({key}) =>  {
            // console.log(projectiles);
             keys.space.pressed = true;
            
-             break;               
+             break;  
+
     }
 })
 
@@ -768,10 +830,29 @@ addEventListener('keyup', ({key}) =>  {
         case 's':
             console.log('down');
             keys.s.pressed = false;
-             break;         
+             break;  
+            case 'A':
+                console.log('left');
+                keys.a.pressed = false;
+                player.rotation = 0; 
+                break;
+            case 'W':
+                console.log('up');
+                keys.w.pressed = false;
+                 break;    
+            case 'D':
+                console.log('right');
+                keys.d.pressed = false;
+                player.rotation = 0; 
+                 break;    
+            case 'S':
+                console.log('down');
+                keys.s.pressed = false;
+                 break;                     
         case ' ':
             console.log('space');
             keys.space.pressed = false;
-             break;               
+             break;  
+     
     }
 })
