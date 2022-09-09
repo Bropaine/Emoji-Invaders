@@ -3,9 +3,14 @@ const levelEl = document.querySelector('#levelEl');
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 let music = new Howl({
-    src: ['./assets/spaceInvadersLevelOne.wav'],
+    src: ['./assets/sounds/spaceInvadersLevelOne.wav'],
     autoplay: true,
     loop: true
+  });
+  let laserSound = new Howl({
+    src: ['./assets/sounds/laser01.wav'],
+    autoplay: true,
+    loop: false
   });
   let mute = false;
   
@@ -80,7 +85,7 @@ class Projectile {
         c.beginPath();
         //Math.PI * 2 creates the full circle with arc()
         c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-        c.fillStyle = 'red';
+        c.fillStyle = playerProjectileColor;
         c.fill();
         c.closePath();
     }
@@ -134,7 +139,9 @@ class Projectile {
         }
 
         const image = new Image();
+        
         image.src = './assets/invader.png'
+       
         image.onload = () => {
         this.image = image;
         const scale = 1;
@@ -197,7 +204,7 @@ class InvaderProjectile {
     }
 
     draw() {
-       c.fillStyle = 'yellow';
+       c.fillStyle = enemyLaserColor;
        c.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
 
@@ -226,7 +233,7 @@ class Grid {
         const rows = Math.floor(Math.random() * 5 + 2);
 
         this.width = columns * 30;
-        this.height = rows * 30;
+        this.height = (rows + 1) * 30;
 
         for  (let x = 0; x < columns; x++) {
             for (let y = 0; y < rows; y++){
@@ -250,19 +257,46 @@ class Grid {
         if (this.position.x + this.width >= canvas.width || this.position.x <= 0) {
             this.velocity.x = -this.velocity.x;
             this.velocity.y = 30;
-            
-    }
-    if (this.position.y + this.height >= canvas.height){
+             
+        }
+    //gameover if invaders reach the bottom
+       if (this.position.y + this.height >= canvas.height){
         setTimeout(() => {
             player.opacity = 0;
             game.over = true;
             }, 0);
            
             setTimeout(() => {
-               
               game.active = false;
-              }, 2000);
-}
+              }, 3000);
+
+              createParticles({
+                object: player,
+                color: 'white',
+                fades: true,
+                num: 1
+             })
+       }
+
+       if (this.position.y + this.height  > Math.floor(player.position.y) && this.position.x + this.width > //
+                                 player.position.x && this.position.x < Math.floor(player.position.x) + player.width && this.position.y <  Math.floor(player.position.y) + player.height ) {
+                                    setTimeout(() => {
+                                        
+                                        player.opacity = 0;
+                                        game.over = true;
+                                        }, 0);
+                                       
+                                        setTimeout(() => {
+                                          game.active = false;
+                                          }, 3000);
+                                      
+                                      createParticles({
+                                          object: player,
+                                          color: 'white',
+                                          fades: true,
+                                          num: 1
+                                       })
+                                  }                        
     
   }
 }
@@ -293,7 +327,8 @@ class EndGame {
     }
 
     update() {
-            this.draw();
+            
+        this.draw();
     }
        
 }
@@ -325,8 +360,6 @@ const keys = {
 
 }
 
-
-
 let frames = 0;
 let randomInterval = Math.floor((Math.random() * 1500) + 1000);
 let game = {
@@ -334,32 +367,24 @@ let game = {
     active: true
 }
 
+
 let score = 0;
 let level = 1;
+let playerProjectileColor = '#ff462e';
 let ProjectileVelocity = 0;
 let enemySpeed = 0;
 let enemySpawn  = 0;
-let speed = 5;
+let speed = 4;
+let enemyLaserColor = 'white';
+let starColor = 'white';
+let executed = false;
 
 
-for (let i = 0; i < 100; i++) {    
-    particles.push(new Particle({
-        position: {
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height
-        },
-        velocity: {
-            x: 0,
-            y: 0.3
-        },
-        radius: Math.random() * 2,
-        color: 'white'
 
-    }))
-}
-function createParticles({object, color, fades}) {
+function createParticles({object, color, fades, num}) {
     //particle effect when enemy is hit
-    for (let i = 0; i < 15; i++) {    
+    this.num = num;
+    for (let i = 0; i < this.num; i++) {    
        particles.push(new Particle({
            position: {
                x: object.position.x + object.width / 2,
@@ -376,7 +401,37 @@ function createParticles({object, color, fades}) {
        }))
    }
 }
+function createStars({num, color}) {
+   
+       this.num = num;
+       this.color = color;
+        for (let i = 0; i < this.num; i++) {
+            particles.push(new Particle({
+                position: {
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height
+                },
+                velocity: {
+                    x: 0,
+                    y: 0.3
+                },
+                radius: Math.random() * 2,
+                color: color
+            }));
+        }
+    
+   
+}
 
+function stars(starColor, num) {
+    this.starColor = starColor;
+    this.num = num;
+    createStars({
+        color: starColor,
+        num: num
+    })
+
+}
 function animate() {
     
     if (!game.active) {
@@ -388,43 +443,109 @@ function animate() {
         music.play();
     }
     //level Progression
-    console.log(game.over);
+    console.log();
     if (score <= 5000) {
         ProjectileVelocity = 1;
         enemySpeed = 1;
         enemySpawn  = 1500;
+        enemyLaserColor = 'yellow';
+        if (!executed){
+            starColor ='white';
+            stars(starColor, 75);
+            executed = true;
+        }
+        
     } else if (score > 5000 && score <= 12000) {
         ProjectileVelocity = 2;
         enemySpeed = 1.5;
         enemySpawn  = 1500;
         level = 2;
         levelEl.innerHTML = level;
+        enemyLaserColor = 'yellow';
+        
     } else if (score > 12000 && score <= 20000) {
         ProjectileVelocity = 2;
         enemySpeed = 2;
         enemySpawn  = 1000;
         level = 3;
         levelEl.innerHTML = level;
+        enemyLaserColor = 'yellow';
+        if (executed){
+            starColor ='#8f5cd1';
+            stars(starColor, 50);
+            executed = false;
+        }
     } else if (score > 20000 && score <= 30000) {
         ProjectileVelocity = 3;
         enemySpeed = 2.5;
         enemySpawn  = 1000;
         level = 4;
         levelEl.innerHTML = level;
+        enemyLaserColor = 'yellow';
+        
     } else if (score > 30000 && score <= 50000) {
         ProjectileVelocity = 3;
         enemySpeed = 3;
         enemySpawn  = 1000;
         level = 5;
         levelEl.innerHTML = level;
-    } else if (score > 50000) {
+        enemyLaserColor = 'green';
+        if (!executed){
+            starColor ='#e3b354';
+            stars(starColor, 30);
+            executed = true;
+        }
+    } else if (score > 50000 && score <= 75000) {
         ProjectileVelocity = 4;
         enemySpeed = 4;
         enemySpawn  = 500;
         level = 6;
         levelEl.innerHTML = level;
+        enemyLaserColor = 'green';
+        
+    } else if (score > 75000 && score <= 100000) {
+        ProjectileVelocity = 4;
+        enemySpeed = 5;
+        enemySpawn  = 500;
+        level = 7;
+        levelEl.innerHTML = level;
+        enemyLaserColor = 'green';
+        if (executed){
+            starColor ='#e3b354';
+            stars(starColor, 25);
+            executed = false;
+        }
     }
-
+    else if (score > 100000 && score <= 150000) {
+        ProjectileVelocity = 5;
+        enemySpeed = 5;
+        enemySpawn  = 500;
+        level = 8;
+        levelEl.innerHTML = level;
+        enemyLaserColor = 'red';
+        
+    } else if (score > 150000 && score <= 200000) {
+        ProjectileVelocity = 5;
+        enemySpeed = 6;
+        enemySpawn  = 250;
+        level = 9;
+        levelEl.innerHTML = level;
+        enemyLaserColor = 'red';
+       
+    } else if (score > 200000) {
+        ProjectileVelocity = 6;
+        enemySpeed = 6;
+        enemySpawn  = 250;
+        level = 10;
+        levelEl.innerHTML = level;
+        enemyLaserColor = 'red';
+        if (!executed){
+            starColor ='#c70000';
+            stars(starColor, 50);
+            executed = true;
+        }
+    }
+   
     const rot = 0.15;
     requestAnimationFrame(animate);
     c.fillStyle = 'black';
@@ -453,8 +574,9 @@ function animate() {
         } else {
         invaderProjectile.update();
         
-        if (Math.floor(invaderProjectile.position.y + invaderProjectile.height)  ===  Math.floor(player.position.y)  && invaderProjectile.position.x + invaderProjectile.width >= //
-             player.position.x && invaderProjectile.position.x <= player.position.x + player.width) {
+        //Hit Box algorithm for collision detection
+        if (invaderProjectile.position.y + invaderProjectile.height  > Math.floor(player.position.y) && invaderProjectile.position.x + invaderProjectile.width > //
+             player.position.x && invaderProjectile.position.x < Math.floor(player.position.x) + player.width && invaderProjectile.position.y <  Math.floor(player.position.y) + player.height ) {
             setTimeout(() => {
               invaderProjectiles.splice(index, 1);
               player.opacity = 0;
@@ -465,11 +587,11 @@ function animate() {
                 game.active = false;
                 }, 2000);
             
-            console.log('You Lose');
             createParticles({
                 object: player,
                 color: 'white',
-                fades: true
+                fades: true,
+                num: 15
              })
         }
         }
@@ -515,7 +637,8 @@ function animate() {
                             scoreEl.innerHTML = score;
                              createParticles({
                                 object: invader,
-                                fades: true
+                                fades: true,
+                                num: 15
                              });
                             grid.invaders.splice(i, 1);
                             projectiles.splice(j, 1);
@@ -525,14 +648,15 @@ function animate() {
                                 const lastInvader = grid.invaders[grid.invaders.length - 1];
                             
                                 grid.width = lastInvader.position.x - firstInvader.position.x + lastInvader.width;
-                                grid.position.y = firstInvader.position.y;
-                                grid.position.x = firstInvader.position.x;
+                                grid.height = lastInvader.position.y - firstInvader.position.y + lastInvader.height;
+                                grid.position.y = firstInvader.position.y;  
                                
                           } else {
                             grids.splice(gridIndex, 1)
                           }
                           
                         }
+                        
                     }, 0)
                 }
             })
@@ -599,6 +723,7 @@ addEventListener('keydown', ({key}) =>  {
         case ' ':
             console.log('space');
           if (!keys.space.pressed){
+            laserSound.play();
             setTimeout(() => {
                 projectiles.push(new Projectile({
                     position: {
@@ -614,7 +739,7 @@ addEventListener('keydown', ({key}) =>  {
                         y: player.velocity.y + 5
                     }   
                 }));
-            }, 10);
+            }, 100);
           }
            // console.log(projectiles);
             keys.space.pressed = true;
