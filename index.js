@@ -1,5 +1,4 @@
 const scoreEl = document.querySelector('#scoreEl');
-const highScoreEl = document.querySelector('#highScoreEl');
 const levelEl = document.querySelector('#levelEl');
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
@@ -44,8 +43,6 @@ class Player {
             x: 0,
             y: 0
         }
-
-
 
         const image = new Image();
         image.src = './assets/spaceship.png'
@@ -255,7 +252,7 @@ class Grid {
         const rows = Math.floor(Math.random() * 5 + 2);
 
         this.width = columns * enemyWidth;
-        this.height = (rows + 1) * enemyHeight;
+        this.height = (rows) * enemyHeight;
 
         for (let x = 0; x < columns; x++) {
             for (let y = 0; y < rows; y++) {
@@ -305,7 +302,7 @@ class Grid {
                 num: 1
             })
         }
-
+//collision if player hits invaders
         if (this.position.y + this.height > Math.floor(player.position.y) && this.position.x + this.width > //
             player.position.x && this.position.x < Math.floor(player.position.x) + player.width && this.position.y < Math.floor(player.position.y) + player.height) {
             setTimeout(() => {
@@ -757,14 +754,14 @@ function animate() {
 
         //player.position.x + player.width is right side of player
     } else if (keys.d.pressed && player.position.x + player.width <= canvas.width && //
-        player.position.y <= canvas.height - player.height && player.position.y >= 0) {
+        player.position.y <= canvas.height - player.height  && player.position.y >= 0) {
         player.velocity.x = speed;
         player.rotation = rot;
     } else if (keys.w.pressed && player.position.y >= 0 && //
-        player.position.x >= 0 && player.position.x + player.width <= canvas.width) {
+        player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
         player.velocity.y = -speed;
-    } else if (keys.s.pressed && player.position.y <= canvas.height - player.height && //
-        player.position.x >= 0 && player.position.x + player.width <= canvas.width) {
+    } else if (keys.s.pressed && player.position.y <= canvas.height - player.height -5 && //
+        player.position.x >= -5 && player.position.x + player.width <= canvas.width +5) {
         player.velocity.y = speed;
     } else {
         player.velocity.x = 0;
@@ -804,26 +801,26 @@ function reportOnGamepad() {
 
     if (gp.axes.length > 0) {
        
-        if (gp.axes[0] < -0.5 && player.position.x >= 0 && player.position.y <= canvas.height - player.height   //
-            && player.position.y > 0 && !game.over) {
+        if (gp.axes[0] < -0.5 && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5  //
+            && player.position.y > -5 && !game.over) {
             player.velocity.x = -speed;
             player.rotation = -rot;
 
         }
 
         else if (gp.axes[0] > 0.5 && player.position.x + player.width <= canvas.width && //
-            player.position.y <= canvas.height - player.height && player.position.y >= 0 && !game.over) {
+            player.position.y <= canvas.height - player.height + 5 && player.position.y >= -5 && !game.over) {
             player.velocity.x = speed;
             player.rotation = rot;
         }
-        else if (gp.axes[1] < -0.5 && player.position.y >= 0 && //
-            player.position.x >= 0 && player.position.x + player.width <= canvas.width && !game.over) {
+        else if (gp.axes[1] < -0.5 && player.position.y >= -5 && //
+            player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = -speed;
 
         }
 
         else if (gp.axes[1] > 0.5 && player.position.y <= canvas.height - player.height && //
-            player.position.x >= 0 && player.position.x + player.width <= canvas.width && !game.over) {
+            player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
         }
        
@@ -861,25 +858,25 @@ function reportOnGamepad() {
             isPressed = false;
         }
         
-        if (gp.buttons[14].pressed && player.position.x >= 0 && player.position.y <= canvas.height - player.height   //
-            && player.position.y > 0 && !game.over) {
+        if (gp.buttons[14].pressed && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5   //
+            && player.position.y > -5 && !game.over) {
             player.velocity.x = -speed;
             player.rotation = -rot;
         }
 
         if (gp.buttons[15].pressed && player.position.x + player.width <= canvas.width && //
-            player.position.y <= canvas.height - player.height && player.position.y >= 0 && !game.over) {
+            player.position.y <= canvas.height - player.height + 5 && player.position.y >= -5 && !game.over) {
             player.velocity.x = speed;
             player.rotation = rot;
         }
 
-        if (gp.buttons[12].pressed && player.position.y >= 0 && //
-            player.position.x >= 0 && player.position.x + player.width <= canvas.width && !game.over) {
+        if (gp.buttons[12].pressed && player.position.y >= -5 && //
+            player.position.x >= -5 && player.position.x + player.width <= canvas.width +5 && !game.over) {
             player.velocity.y = -speed;
         }
 
         if (gp.buttons[13].pressed && player.position.y <= canvas.height - player.height && //
-            player.position.x >= 0 && player.position.x + player.width <= canvas.width && !game.over) {
+            player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
         }
     }
@@ -952,6 +949,7 @@ addEventListener('keydown', ({ key }) => {
 })
 
 addEventListener('keyup', ({ key }) => {
+    
     switch (key) {
       
         case 'a':
