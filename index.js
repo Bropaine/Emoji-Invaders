@@ -14,19 +14,19 @@ let music02 = new Howl({
     autoplay: false,
     loop: true
 });
-music02.volume(0.5);
+
 let music03 = new Howl({
     src: ['./assets/sounds/spaceInvaders03.wav'],
     autoplay: false,
     loop: true
 });
-music03.volume(0.15);
+
 let music04 = new Howl({
     src: ['./assets/sounds/spaceInvaders04.wav'],
     autoplay: false,
     loop: true
 });
-music04.volume(0.15);
+
 let laserSound = new Howl({
     src: ['./assets/sounds/laser01.wav'],
     autoplay: false,
@@ -530,7 +530,7 @@ function animate() {
         }
         if (!music.playing() && !explosionEnd.playing()) {
             music.play();
-            music.volume(0.5);
+            music.volume(0.75);
         }
 
     } else if (score > 5000 && score <= 12000) {
@@ -565,6 +565,7 @@ function animate() {
         if (!music02.playing()) {
             music.stop();
             music02.play();
+            music02.volume(0.75);
         }
 
     } else if (score > 20000 && score <= 30000) {
@@ -604,6 +605,7 @@ function animate() {
         if (!music03.playing()) {
             music02.stop();
             music03.play();
+            music03.volume(0.75);
         }
 
     } else if (score > 75000 && score <= 100000) {
@@ -661,6 +663,7 @@ function animate() {
         if (!music04.playing()) {
             music03.stop();
             music04.play();
+            music04.volume(0.75);
         }
     }
 
