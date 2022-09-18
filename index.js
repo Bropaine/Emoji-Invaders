@@ -7,15 +7,14 @@ let music = new Howl({
     src: ['./assets/sounds/spaceInvadersLevelOne.wav'],
     autoplay: false,
     loop: true,
-    volume: 0.5
 });
-music.volume(0.15);
+
 let music02 = new Howl({
     src: ['./assets/sounds/spaceInvaders02.wav'],
     autoplay: false,
     loop: true
 });
-music02.volume(0.15);
+music02.volume(0.5);
 let music03 = new Howl({
     src: ['./assets/sounds/spaceInvaders03.wav'],
     autoplay: false,
@@ -518,7 +517,6 @@ function animate() {
     }
 
     //level Progression
-    console.log();
     if (score <= 5000) {
         ProjectileVelocity = 1;
         enemySpeed = 1;
@@ -532,6 +530,7 @@ function animate() {
         }
         if (!music.playing() && !explosionEnd.playing()) {
             music.play();
+            music.volume(0.5);
         }
 
     } else if (score > 5000 && score <= 12000) {
