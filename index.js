@@ -8,24 +8,25 @@ let music = new Howl({
     autoplay: false,
     loop: true
 });
-
+music.volume(0.15);
 let music02 = new Howl({
     src: ['./assets/sounds/spaceInvaders02.wav'],
     autoplay: false,
     loop: true
 });
+music02.volume(0.15);
 let music03 = new Howl({
     src: ['./assets/sounds/spaceInvaders03.wav'],
     autoplay: false,
     loop: true
 });
-
+music03.volume(0.15);
 let music04 = new Howl({
     src: ['./assets/sounds/spaceInvaders04.wav'],
     autoplay: false,
     loop: true
 });
-
+music04.volume(0.15);
 let laserSound = new Howl({
     src: ['./assets/sounds/laser01.wav'],
     autoplay: false,
