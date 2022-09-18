@@ -6,7 +6,8 @@ const rot = 0.15;
 let music = new Howl({
     src: ['./assets/sounds/spaceInvadersLevelOne.wav'],
     autoplay: false,
-    loop: true
+    loop: true,
+    volume: 0.5
 });
 music.volume(0.15);
 let music02 = new Howl({
