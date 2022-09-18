@@ -1,11 +1,16 @@
 
 <style>
+    
     body {
         margin: 0;
         display: flex;
         justify-content: center;
         align-items: center;
+        position: relative;
         background-color: black;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url('./assets/background.jpg');
     }
 
     
@@ -15,7 +20,31 @@
     font-family: sans-serif; font-size: large;" ><span>Score: </span><span id="scoreEl">0</span></p>
     <p style="position: absolute; z-index: 10; color: white; right: 10px; top: 10px; margin: 0; 
     font-family: sans-serif; font-size: large;" ><span>Level: </span><span id="levelEl">1</span></p>
+  
 <canvas> </canvas>
 </div>
+<input alt="reset button" type="image" src="assets/reset001.png" style= " cursor:crosshair; position: absolute; bottom: 10px; align-items: center; " id="buttonImage" value="Restart Game" >
+
+<script>
+    buttonImage = "assets/reset001.png" ;
+    buttonImage02 = "assets/reset002.png" ;
+
+    document.getElementById("buttonImage").addEventListener("click", function() { 
+    if (this.getAttribute("src") === buttonImage) {
+        path = buttonImage02;
+        this.setAttribute("src", path);
+    } else {
+        path = buttonImage;
+        this.setAttribute("src", path);
+    }
+    setTimeout(() => {
+        location.reload()
+    }, 350);
+   
+} )
+
+
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.min.js"></script>
 <script src="./index.js"></script>
+

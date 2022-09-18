@@ -17,7 +17,13 @@ let music02 = new Howl({
 let music03 = new Howl({
     src: ['./assets/sounds/spaceInvaders03.wav'],
     autoplay: false,
-    loop: false
+    loop: true
+});
+
+let music04 = new Howl({
+    src: ['./assets/sounds/spaceInvaders04.wav'],
+    autoplay: false,
+    loop: true
 });
 
 let laserSound = new Howl({
@@ -33,8 +39,8 @@ let explosionEnd = new Howl({
 });
 let mute = false;
 
-canvas.width = 1024;
-canvas.height = 576;
+canvas.width = 1010;
+canvas.height = 665;
 
 class Player {
     constructor() {
@@ -45,17 +51,17 @@ class Player {
         }
 
         const image = new Image();
-        image.src = './assets/spaceship.png'
+        image.src = './assets/ship001.png'
         image.onload = () => {
             this.image = image;
             //Shrink image and maintain the aspect ratio
-            const scale = 0.15;
+            const scale = 1;
             this.width = image.width * scale;
             this.height = image.height * scale;
             this.opacity = 1;
             this.position = {
                 x: canvas.width / 2 - this.width / 2,
-                y: canvas.height - this.height - 20
+                y: canvas.height - this.height 
             }
 
             this.rotation = 0;
@@ -65,8 +71,6 @@ class Player {
     }
 
     draw() {
-        // c.fillStyle = 'red';
-        // c.fillRect(this.position.x, this.position.y, this.width, this.height);
         //Only draw if image is loaded
         //save snapshot of canvas then translate to center of player
         c.save();
@@ -94,26 +98,58 @@ class Player {
 
 class Projectile {
     constructor({ position, velocity, negVelocity }) {
+        const image = new Image();
+        image.src = './assets/shipbeam.png'
         this.position = position;
         this.velocity = velocity;
         this.negVelocity = negVelocity;
         this.radius = 4;
+
+        image.onload = () => {
+            this.image = image;
+            //Shrink image and maintain the aspect ratio
+            const scale = 1;
+            this.width = image.width * scale;
+            this.height = image.height * scale;
+            this.opacity = 1;
+            this.position = {
+                x: this.position.x - 5,
+                y: this.position.y 
+            }
     }
+}
 
     draw() {
+        /*
         c.beginPath();
         //Math.PI * 2 creates the full circle with arc()
         c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
         c.fillStyle = playerProjectileColor;
         c.fill();
         c.closePath();
+        */
+        c.drawImage(
+            this.image,
+            this.position.x,
+            this.position.y,
+            this.width,
+            this.height
+        )
     }
 
     update() {
+        if (this.image) {
+            this.draw();
+            this.position.x += this.velocity.x;
+            this.position.y -= this.negVelocity.y;
+            this.position.y += this.velocity.y;
+        }
+        /*
         this.draw();
         this.position.x += this.velocity.x;
         this.position.y -= this.negVelocity.y;
         this.position.y += this.velocity.y;
+        */
     }
 }
 
@@ -264,7 +300,6 @@ class Grid {
                 }))
             }
         }
-        // console.log(this.invaders);
     }
 
     update() {
@@ -415,6 +450,7 @@ let starColor = 'white';
 let particleColor = '#BAA0DE';
 let executed = false;
 let isPressed = false;
+let isPressedReset = false;
 
 function createParticles({ object, color, fades, num }) {
     //particle effect when enemy is hit
@@ -468,13 +504,13 @@ function stars(starColor, num) {
 
 }
 
-
 function animate() {
 
     if (!game.active) {
         music.stop();
         music02.stop();
         music03.stop();
+        music04.stop();
         endGame.update();
         return;
     }
@@ -502,7 +538,8 @@ function animate() {
         enemySpawn = 1500;
         level = 2;
         levelEl.innerHTML = level;
-        enemySprite = './assets/invader.png';
+        enemySprite = './assets/alienEmoji.png';
+        particleColor = '#5f7b7c';
         enemyLaserColor = 'yellow';
         if (executed) {
             starColor = 'white';
@@ -517,7 +554,8 @@ function animate() {
         level = 3;
         levelEl.innerHTML = level;
         enemyLaserColor = 'yellow';
-        enemySprite = './assets/invader.png';
+        particleColor = '#b8b8b8';
+        enemySprite = './assets/skullEmoji.png';
         if (!executed) {
             starColor = '#8f5cd1';
             stars(starColor, 50);
@@ -534,8 +572,8 @@ function animate() {
         enemySpawn = 1000;
         level = 4;
         levelEl.innerHTML = level;
-        enemySprite = './assets/greenInvader.png';
-        particleColor = 'green';
+        enemySprite = './assets/crazyEmoji.png';
+        particleColor = '#fee7b1';
         enemyLaserColor = 'orange';
         if (executed) {
             starColor = '#e3b354';
@@ -549,19 +587,19 @@ function animate() {
         enemySpawn = 1000;
         level = 5;
         levelEl.innerHTML = level;
-        enemySprite = './assets/greenInvader.png';
+        enemySprite = './assets/pooEmoji.png';
         enemyLaserColor = 'orange';
-        particleColor = 'green'
+        particleColor = '#805023'
 
     } else if (score > 50000 && score <= 75000) {
         ProjectileVelocity = 4;
-        enemySpeed = 4;
+        enemySpeed = 3.5;
         enemySpawn = 500;
         level = 6;
         levelEl.innerHTML = level;
         enemyLaserColor = 'orange';
-        enemySprite = './assets/greenInvader.png';
-        particleColor = 'green'
+        enemySprite = './assets/loveEmoji.png';
+        particleColor = '#805023'
         if (!music03.playing()) {
             music02.stop();
             music03.play();
@@ -569,13 +607,13 @@ function animate() {
 
     } else if (score > 75000 && score <= 100000) {
         ProjectileVelocity = 4;
-        enemySpeed = 5;
+        enemySpeed = 3.75;
         enemySpawn = 500;
         level = 7;
         levelEl.innerHTML = level;
         enemyLaserColor = 'green';
-        enemySprite = './assets/redInvader.png';
-        particleColor = 'red'
+        enemySprite = './assets/sinisterEmoji.png';
+        particleColor = '#d6a8e2'
         if (!executed) {
             starColor = '#e3b354';
             stars(starColor, 25);
@@ -585,27 +623,27 @@ function animate() {
 
     else if (score > 100000 && score <= 150000) {
         ProjectileVelocity = 5;
-        enemySpeed = 5;
+        enemySpeed = 4;
         enemySpawn = 500;
         level = 8;
         levelEl.innerHTML = level;
-        enemySprite = './assets/redInvader.png';
-        particleColor = 'red';
+        enemySprite = './assets/devilEmoji.png';
+        particleColor = '#f08370';
         enemyLaserColor = 'green';
 
     } else if (score > 150000 && score <= 200000) {
         ProjectileVelocity = 5;
-        enemySpeed = 6;
+        enemySpeed = 4.5;
         enemySpawn = 250;
         level = 9;
         levelEl.innerHTML = level;
-        enemySprite = './assets/redInvader.png';
-        particleColor = 'red';
+        enemySprite = './assets/madEmoji.png';
+        particleColor = '#f8600d';
         enemyLaserColor = 'green';
 
     } else if (score > 200000) {
-        ProjectileVelocity = 6;
-        enemySpeed = 6;
+        ProjectileVelocity = 5.5;
+        enemySpeed = 4.75;
         enemySpawn = 250;
         level = 10;
         levelEl.innerHTML = level;
@@ -619,13 +657,17 @@ function animate() {
             stars(starColor, 50);
             executed = false;
         }
+        if (!music04.playing()) {
+            music03.stop();
+            music04.play();
+        }
     }
 
     const rot = 0.15;
     requestAnimationFrame(animate);
     c.fillStyle = 'black';
     c.fillRect(0, 0, canvas.width, canvas.height);
-    player.update();
+   // player.update();
 
     particles.forEach((particle, i) => {
         if (particle.position.y - particle.radius >= canvas.height) {
@@ -687,7 +729,7 @@ function animate() {
         }
     })
 
-
+    player.update();
     grids.forEach((grid, gridIndex) => {
         grid.update();
         //spawn projectiles
@@ -731,7 +773,6 @@ function animate() {
 
                                 grid.width = lastInvader.position.x - firstInvader.position.x + lastInvader.width;
                                 grid.height = lastInvader.position.y - firstInvader.position.y + lastInvader.height;
-                                grid.position.y = lastInvader.position.y;
 
                             } else {
                                 grids.splice(gridIndex, 1)
@@ -833,7 +874,7 @@ function reportOnGamepad() {
     
     if (gp.buttons.length > 0) {
        
-        if (gp.buttons[0].pressed && !isPressed && !game.over){
+        if ((gp.buttons[0].pressed || gp.buttons[7].pressed || gp.buttons[5].pressed) && !isPressed && !game.over){
             laserSound.play();
                 setTimeout(() => {
                     projectiles.push(new Projectile({
@@ -854,7 +895,7 @@ function reportOnGamepad() {
                 isPressed = true;
             }
         
-        if (!gp.buttons[0].pressed) {
+        if (!gp.buttons[0].pressed && !gp.buttons[7].pressed && !gp.buttons[5].pressed) {
             isPressed = false;
         }
         
@@ -878,6 +919,15 @@ function reportOnGamepad() {
         if (gp.buttons[13].pressed && player.position.y <= canvas.height - player.height && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
+        }
+
+        if (gp.buttons[9].pressed && !isPressedReset) {
+            let reset = document.getElementById("buttonImage");
+            reset.click();
+            isPressedReset = true;
+        }
+        if (!gp.buttons[9].pressed) {
+            isPressedReset = false;
         }
     }
 }
@@ -994,4 +1044,4 @@ addEventListener('keyup', ({ key }) => {
             break;
 
     }
-})
+}) 
