@@ -38,6 +38,7 @@ let explosionEnd = new Howl({
     autoplay: false,
     loop: false
 });
+
 let mute = false;
 
 canvas.width = 1010;
