@@ -1,6 +1,8 @@
+
 const scoreEl = document.querySelector('#scoreEl');
 const levelEl = document.querySelector('#levelEl');
 const canvas = document.querySelector('canvas');
+
 const c = canvas.getContext('2d');
 const rot = 0.15;
 let music = new Howl({
@@ -850,10 +852,10 @@ window.addEventListener("gamepaddisconnected", function (e) {
 
 function reportOnGamepad() {
     let gp = navigator.getGamepads()[0];
-
+    
     if (gp.axes.length > 0) {
        
-        if (gp.axes[0] < -0.5 && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5  //
+        if (gp.axes[0] < -0.5  && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5  //
             && player.position.y > -5 && !game.over) {
             player.velocity.x = -speed;
             player.rotation = -rot;
