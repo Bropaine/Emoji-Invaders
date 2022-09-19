@@ -32,3 +32,6 @@ body {
     background-size: cover;
     background-image: url('./assets/background.png');
 }
+.disable-dbl-tap-zoom {
+    touch-action: manipulation;
+  }
