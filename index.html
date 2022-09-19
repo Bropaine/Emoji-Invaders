@@ -1,7 +1,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<head><link rel="stylesheet" type="text/css" href="index.css"></head>
+<head>
+    <link rel="stylesheet" type="text/css" href="index.css">
+</head>
 
 
  
@@ -17,8 +19,17 @@
     </div>
 
 
-<input alt="reset button" type="image" src="assets/reset001.png" style= " cursor:crosshair; position: absolute; bottom: 10px; align-items: center; " id="buttonImage" value="Restart Game" >
+<input alt="reset button" type="image" src="assets/reset001.png" style= "cursor:crosshair; position: absolute; bottom: 10px; align-items: center;" id="buttonImage" value="Restart Game" >
 
+
+
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.min.js"></script>
+<script src="./index.js"></script>
+
+<script type="text/javascript" src="joystick.js"></script> 
 <script>
     buttonImage = "assets/reset001.png" ;
     buttonImage02 = "assets/reset002.png" ;
@@ -37,19 +48,4 @@
    
 } )
 
-
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.min.js"></script>
-<script src="./index.js"></script>
-
-<script>
-    function resize(){    
-      $("#canvas").outerHeight($(window).height()-$("#canvas").offset().top- Math.abs($("#canvas").outerHeight(true) - $("#canvas").outerHeight()));
-    }
-    $(document).ready(function(){
-      resize();
-      $(window).on("resize", function(){                      
-          resize();
-      });
-    });
-    </script>
