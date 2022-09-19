@@ -21,7 +21,7 @@
   
 
 <input alt="reset button" type="image" src="assets/reset001.png" style= "cursor:crosshair; position: absolute; bottom: 10px; align-items: center;" id="buttonImage" value="Restart Game" >
-<div id="joyDiv" style="position:absolute; align-items: center; width:100px; height:100px; bottom:20px; left:50px;"></div>
+<div id="joyDiv" style="position:absolute; align-items: center; width:75px; height:75px; bottom:20px; left:50px;"></div>
 
 
 
@@ -51,36 +51,40 @@
 </script>
 <script type="text/javascript">
     // Create JoyStick object into the DIV 'joyDiv'
+   
     var joy = new JoyStick('joyDiv');
+   
      setInterval(function(){ 
        
-        if (joy.GetY() > 0 && player.position.y >= -5 && //
+        if (joy.GetY() >= 100  && player.position.y >= -5 && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = -speed;
 
         }
-        else if (joy.GetY() < 0 && player.position.y <= canvas.height - player.height && //
+        else if (joy.GetY() <= -100  && player.position.y <= canvas.height - player.height && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
         }
-        else if (joy.GetX() > 0 && player.position.x + player.width <= canvas.width && //
+        else if (joy.GetX() >= 100 && joy.GetY() > -100 && joy.GetY() < 100 && player.position.x + player.width <= canvas.width && //
             player.position.y <= canvas.height - player.height + 5 && player.position.y >= -5 && !game.over) {
             player.velocity.x = speed;
             player.rotation = rot;
         }
-        else if (joy.GetX() < 0 && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5  //
+        else if (joy.GetX() <= -100 && joy.GetY() > -100 && joy.GetY() < 100 && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5  //
             && player.position.y > -5 && !game.over) {
             player.velocity.x = -speed;
             player.rotation = -rot;
 
         }
-        /*else {
+        else {
             player.velocity.x = 0;
             player.velocity.y = 0;
             player.rotation = 0;
-        }*/
-    
+        }
+    console.log(joy.GetX());
+    console.log(joy.GetY());
     }, 1);
+    
 
 
 
