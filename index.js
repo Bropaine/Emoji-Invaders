@@ -41,8 +41,12 @@ let explosionEnd = new Howl({
 
 let mute = false;
 
-canvas.width = 1010;
-canvas.height = 665;
+let heightRatio = 2.5;
+let widthRatio = 1.53;
+canvas.height = canvas.width * heightRatio;
+//canvas.width = 1200;
+canvas.width = canvas.height * widthRatio;;
+//canvas.height = 665;
 
 class Player {
     constructor() {
