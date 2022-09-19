@@ -847,43 +847,6 @@ window.addEventListener("gamepaddisconnected", function (e) {
         e.gamepad.index, e.gamepad.id);
 });
 
-//virtual joystick
-window.addEventListener("load", function(){
-    var joystick = new JoyStick({
-        radius: 80,
-        x: this.window.innerWidth / 5 ,
-        y: window.innerHeight  /1.25,
-        inner_radius: 70
-    });
-
-    function check() {
-        requestAnimationFrame( check );
-        
-        if (joystick.left && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5   //
-        && player.position.y > -5 && !game.over) {
-        player.velocity.x = -speed;
-        player.rotation = -rot;
-    }
-
-    if (joystick.right && player.position.x + player.width <= canvas.width && //
-        player.position.y <= canvas.height - player.height + 5 && player.position.y >= -5 && !game.over) {
-        player.velocity.x = speed;
-        player.rotation = rot;
-    }
-
-    if (joystick.up && player.position.y >= -5 && //
-        player.position.x >= -5 && player.position.x + player.width <= canvas.width +5 && !game.over) {
-        player.velocity.y = -speed;
-    }
-
-    if (joystick.down && player.position.y <= canvas.height - player.height && //
-        player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
-        player.velocity.y = speed;
-    }
-    }
-    check();
-    
-});
 
 function reportOnGamepad() {
     let gp = navigator.getGamepads()[0];
