@@ -835,6 +835,26 @@ function animate() {
 
 animate();
 
+document.querySelector("#fireButton").addEventListener("click", function() {
+    laserSound.play();
+    setTimeout(() => {
+        projectiles.push(new Projectile({
+            position: {
+                x: player.position.x + player.width / 2,
+                y: player.position.y
+            },
+            velocity: {
+                x: 0,
+                y: player.velocity.y - 5
+            },
+            negVelocity: {
+                x: 0,
+                y: player.velocity.y + 5
+            }
+        }));
+    }, 100);
+})
+
 window.addEventListener("gamepadconnected", function (e) {
     let gp = navigator.getGamepads()[e.gamepad.index]
     console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
