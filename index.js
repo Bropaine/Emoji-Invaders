@@ -470,7 +470,7 @@ highScore = localStorage.getItem(localStorageName) == null ? 0 :
 function calcHighScore () {
     highScore = Math.max(score, highScore);
     localStorage.setItem(localStorageName, highScore);   
-    if (highScore == score) { 
+    if (highScore == score) {
         highScoreEl.style.color = 'green';
     }
     return highScore;
@@ -834,6 +834,11 @@ function animate() {
     } else if (keys.s.pressed && player.position.y <= canvas.height - player.height -5 && //
         player.position.x >= -5 && player.position.x + player.width <= canvas.width +5) {
         player.velocity.y = speed;
+    }
+    else {
+        player.velocity.y = 0;
+        player.velocity.x = 0;
+        player.rot = 0;
     }
 
 
