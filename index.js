@@ -816,10 +816,6 @@ function animate() {
     } else if (keys.s.pressed && player.position.y <= canvas.height - player.height -5 && //
         player.position.x >= -5 && player.position.x + player.width <= canvas.width +5) {
         player.velocity.y = speed;
-    } else {
-        player.velocity.x = 0;
-        player.velocity.y = 0;
-        player.rotation = 0;
     }
 
 
@@ -898,11 +894,7 @@ function reportOnGamepad() {
             player.velocity.y = speed;
         }
        
-        else {
-            player.velocity.x = 0;
-            player.velocity.y = 0;
-            player.rotation = 0;
-        }
+       
     }
     
     if (gp.buttons.length > 0) {
