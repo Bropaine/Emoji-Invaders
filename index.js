@@ -470,7 +470,7 @@ highScore = localStorage.getItem(localStorageName) == null ? 0 :
 function calcHighScore () {
     highScore = Math.max(score, highScore);
     localStorage.setItem(localStorageName, highScore);   
-    if (highScore == score) { 
+    if (highScore == score) {
         highScoreEl.style.color = 'green';
     }
     return highScore;
