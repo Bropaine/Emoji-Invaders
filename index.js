@@ -835,6 +835,11 @@ function animate() {
         player.position.x >= -5 && player.position.x + player.width <= canvas.width +5) {
         player.velocity.y = speed;
     }
+    else {
+        player.velocity.y = 0;
+        player.velocity.x = 0;
+        player.rot = 0;
+    }
 
 
     //randomly spawn invaders
