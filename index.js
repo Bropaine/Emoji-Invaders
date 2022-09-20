@@ -1,4 +1,4 @@
-
+const highScoreEl = document.querySelector('#highScoreEl');
 const scoreEl = document.querySelector('#scoreEl');
 const levelEl = document.querySelector('#levelEl');
 const canvas = document.querySelector('canvas');
@@ -447,6 +447,8 @@ let game = {
 let enemySprite = './assets/invader.png';
 let enemyWidth = 30;
 let enemyHeight = 30;
+let highScore;
+let localStorageName = 'emojiInvaderScore';
 let score = 0;
 let level = 1;
 let playerProjectileColor = '#ff462e';
@@ -460,6 +462,20 @@ let particleColor = '#BAA0DE';
 let executed = false;
 let isPressed = false;
 let isPressedReset = false;
+
+highScore = localStorage.getItem(localStorageName) == null ? 0 :
+            localStorage.getItem(localStorageName);
+            highScoreEl.innerHTML = highScore;
+
+function calcHighScore () {
+    highScore = Math.max(score, highScore);
+    localStorage.setItem(localStorageName, highScore);   
+    if (highScore == score) { 
+        highScoreEl.style.color = 'green';
+    }
+    return highScore;
+}
+
 
 function createParticles({ object, color, fades, num }) {
     //particle effect when enemy is hit
@@ -769,7 +785,9 @@ function animate() {
                         //remove invader and projectile
                         if (invaderFound && projectileFound) {
                             score += 100;
+                            highScoreEl.innerHTML = calcHighScore();
                             scoreEl.innerHTML = score;
+                            
                             createParticles({
                                 object: invader,
                                 color: particleColor,
@@ -893,8 +911,7 @@ function reportOnGamepad() {
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
         }
-       
-       
+
     }
     
     if (gp.buttons.length > 0) {
@@ -960,7 +977,7 @@ function reportOnGamepad() {
 
 addEventListener('keydown', ({ key }) => {
     if (game.over) return;
-    console.log(key);
+    
     switch (key) {
 
         case 'a':
