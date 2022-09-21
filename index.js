@@ -41,6 +41,11 @@ let explosionEnd = new Howl({
     loop: false
 });
 
+let powerUpSound = new Howl({
+    src: ['./assets/sounds/powerup02.wav'],
+    autoplay: false,
+    loop: false
+});
 
 let mute = false;
 
@@ -406,7 +411,60 @@ class EndGame {
     }
 
 }
+class PowerUp {
+    constructor({ position, velocity, radius, color, fades }) {
+        this.position = position;
+        this.velocity = velocity;
+        this.radius = radius;
+        this.color = color;
+        this.opacity = 1;
+        this.fades = fades;
+    }
 
+    draw() {
+        c.save();
+        c.globalAlpha = this.opacity;
+        c.beginPath();
+        //Math.PI * 2 creates the full circle with arc()
+        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+        c.fillStyle = this.color;
+        c.fill();
+        c.closePath();
+        c.restore();
+    }
+
+    update() {
+        if (!this.fades){
+            this.draw();
+        }
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+
+        if (powerup.position.y + powerup.radius > Math.floor(player.position.y) && powerup.position.x + powerup.radius > //
+        player.position.x && powerup.position.x < Math.floor(player.position.x) + player.width && powerup.position.y < Math.floor(player.position.y) + player.height) {
+            console.log("Boom!");
+            this.fades = true;
+            laserShot = true;
+            powerUpSound.volume(0.5);
+            powerUpSound.play();
+           
+            setTimeout(() => {
+                laserShot = false;
+            },10000)
+            
+        }
+    }
+}
+
+ setInterval(() => {
+
+    createPowerUp();
+
+ }, 10000)
+
+
+ 
+let powerup;
 const player = new Player();
 const endGame = new EndGame();
 const projectiles = [];
@@ -462,6 +520,7 @@ let particleColor = '#BAA0DE';
 let executed = false;
 let isPressed = false;
 let isPressedReset = false;
+let laserShot = false;
 
 highScore = localStorage.getItem(localStorageName) == null ? 0 :
             localStorage.getItem(localStorageName);
@@ -476,7 +535,21 @@ function calcHighScore () {
     return highScore;
 }
 
-
+function createPowerUp() {
+    powerup = new PowerUp({
+        position: {
+            x: Math.floor(Math.random() * canvas.width), 
+            y: Math.floor(Math.random() * canvas.height)
+        },
+        velocity: {
+            x: 0,
+            y: 1
+        },
+        radius: 10,
+        color: 'red',
+        fades: false
+    })
+}
 function createParticles({ object, color, fades, num }) {
     //particle effect when enemy is hit
     this.num = num;
@@ -529,6 +602,7 @@ function stars(starColor, num) {
 
 }
 
+ 
 function animate() {
 
     if (!game.active) {
@@ -695,6 +769,9 @@ function animate() {
     requestAnimationFrame(animate);
     c.fillStyle = 'black';
     c.fillRect(0, 0, canvas.width, canvas.height);
+    if(powerup) {
+        powerup.update();
+    }
    // player.update();
 
     particles.forEach((particle, i) => {
@@ -710,7 +787,6 @@ function animate() {
             particle.update();
         }
     })
-    // console.log(particles);
     invaderProjectiles.forEach((invaderProjectile, index) => {
         if (invaderProjectile.position.y + invaderProjectile.height >= canvas.height) {
             setTimeout(() => {
@@ -986,39 +1062,30 @@ addEventListener('keydown', ({ key }) => {
     switch (key) {
 
         case 'a':
-            console.log('left');
             keys.a.pressed = true;
             break;
         case 'w':
-            console.log('up');
             keys.w.pressed = true;
             break;
         case 'd':
-            console.log('right');
             keys.d.pressed = true;
             break;
         case 's':
-            console.log('down');
             keys.s.pressed = true;
             break;
         case 'A':
-            console.log('left');
             keys.a.pressed = true;
             break;
         case 'W':
-            console.log('up');
             keys.w.pressed = true;
             break;
         case 'D':
-            console.log('right');
             keys.d.pressed = true;
             break;
         case 'S':
-            console.log('down');
             keys.s.pressed = true;
             break;
         case ' ':
-            console.log('space');
             if (!keys.space.pressed) {
                 laserSound.play();
                 setTimeout(() => {
@@ -1038,9 +1105,9 @@ addEventListener('keydown', ({ key }) => {
                     }));
                 }, 100);
             }
-            // console.log(projectiles);
-            keys.space.pressed = true;
-
+            if (!laserShot) {
+               keys.space.pressed = true;
+            }
             break;
 
     }
@@ -1051,43 +1118,34 @@ addEventListener('keyup', ({ key }) => {
     switch (key) {
       
         case 'a':
-            console.log('left');
             keys.a.pressed = false;
             player.rotation = 0;
             break;
         case 'w':
-            console.log('up');
             keys.w.pressed = false;
             break;
         case 'd':
-            console.log('right');
             keys.d.pressed = false;
             player.rotation = 0;
             break;
         case 's':
-            console.log('down');
             keys.s.pressed = false;
             break;
         case 'A':
-            console.log('left');
             keys.a.pressed = false;
             player.rotation = 0;
             break;
         case 'W':
-            console.log('up');
             keys.w.pressed = false;
             break;
         case 'D':
-            console.log('right');
             keys.d.pressed = false;
             player.rotation = 0;
             break;
         case 'S':
-            console.log('down');
             keys.s.pressed = false;
             break;
         case ' ':
-            console.log('space');
             keys.space.pressed = false;
             break;
 
