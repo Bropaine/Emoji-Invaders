@@ -411,6 +411,7 @@ class EndGame {
     }
 
 }
+
 class PowerUp {
     constructor({ position, velocity, radius, color, fades }) {
         this.position = position;
@@ -422,6 +423,22 @@ class PowerUp {
     }
 
     draw() {
+        let randomNum = Math.floor(Math.random() * 4)
+        switch (randomNum) {
+            case 0:
+                this.color = 'green'
+                break;
+            case 1:
+                this.color = 'blue'
+                break;
+            case 2:
+                this.color = 'white'
+                break;
+            case 3:
+                this.color = 'red'
+                break;       
+        }
+
         c.save();
         c.globalAlpha = this.opacity;
         c.beginPath();
@@ -431,6 +448,7 @@ class PowerUp {
         c.fill();
         c.closePath();
         c.restore();
+        
     }
 
     update() {
@@ -445,8 +463,8 @@ class PowerUp {
             console.log("Boom!");
             this.fades = true;
             laserShot = true;
-            powerUpSound.volume(0.5);
             powerUpSound.play();
+            powerUpSound.volume(0.5);
            
             setTimeout(() => {
                 laserShot = false;
@@ -460,7 +478,7 @@ class PowerUp {
 
     createPowerUp();
 
- }, 10000)
+ }, 60000)
 
 
  
@@ -545,7 +563,7 @@ function createPowerUp() {
             x: 0,
             y: 1
         },
-        radius: 10,
+        radius: 20,
         color: 'red',
         fades: false
     })
