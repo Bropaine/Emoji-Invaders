@@ -111,20 +111,19 @@ class Player {
 }
 
 class Projectile {
-    constructor({ position, velocity, negVelocity }) {
+    constructor({ position, velocity, negVelocity, scale }) {
         const image = new Image();
-        image.src = './assets/shipbeam.png'
+        image.src = playerProjectileSprite;
         this.position = position;
         this.velocity = velocity;
         this.negVelocity = negVelocity;
         this.radius = 4;
-
+        this.scale = scale || 1;
         image.onload = () => {
             this.image = image;
             //Shrink image and maintain the aspect ratio
-            const scale = 1;
-            this.width = image.width * scale;
-            this.height = image.height * scale;
+            this.width = image.width * this.scale;
+            this.height = image.height * this.scale;
             this.opacity = 1;
             this.position = {
                 x: this.position.x - 5,
@@ -462,12 +461,15 @@ class PowerUp {
         player.position.x && powerup.position.x < Math.floor(player.position.x) + player.width && powerup.position.y < Math.floor(player.position.y) + player.height) {
             console.log("Boom!");
             this.fades = true;
-            laserShot = true;
+          
+                doubleShot = true;
+                
             powerUpSound.play();
             powerUpSound.volume(0.5);
            
             setTimeout(() => {
-                laserShot = false;
+                doubleShot = false;
+
             },10000)
             
         }
@@ -478,7 +480,7 @@ class PowerUp {
 
     createPowerUp();
 
- }, 60000)
+ }, 30000)
 
 
  
@@ -520,6 +522,7 @@ let game = {
     active: true
 }
 
+let playerProjectileSprite = './assets/shipbeam.png';
 let enemySprite = './assets/invader.png';
 let enemyWidth = 30;
 let enemyHeight = 30;
@@ -538,7 +541,7 @@ let particleColor = '#BAA0DE';
 let executed = false;
 let isPressed = false;
 let isPressedReset = false;
-let laserShot = false;
+let doubleShot = false;
 
 highScore = localStorage.getItem(localStorageName) == null ? 0 :
             localStorage.getItem(localStorageName);
@@ -864,9 +867,9 @@ function animate() {
             //collision detection and enemy removal
             //projectiles hit enemy
             projectiles.forEach((projectile, j) => {
-                if (projectile.position.y - projectile.radius <= invader.position.y + invader.height && projectile.position.x + projectile.radius //
-                    >= invader.position.x && projectile.position.x - projectile.radius <= invader.position.x + invader.width && projectile.position.y //
-                    + projectile.radius >= invader.position.y) {
+                if (projectile.position.y  <= invader.position.y + invader.height && projectile.position.x  //
+                    >= invader.position.x && projectile.position.x  <= invader.position.x + invader.width && projectile.position.y //
+                     >= invader.position.y) {
 
                     setTimeout(() => {
                         //check if invader is in parent grid array
@@ -949,23 +952,60 @@ function animate() {
 animate();
 
 document.querySelector("#fireButton").addEventListener("click", function() {
-    laserSound.play();
-    setTimeout(() => {
-        projectiles.push(new Projectile({
-            position: {
-                x: player.position.x + player.width / 2,
-                y: player.position.y
-            },
-            velocity: {
-                x: 0,
-                y: player.velocity.y - 5
-            },
-            negVelocity: {
-                x: 0,
-                y: player.velocity.y + 5
-            }
-        }));
-    }, 100);
+    if (!doubleShot) {
+        laserSound.play();
+        setTimeout(() => {
+            projectiles.push(new Projectile({
+                position: {
+                    x: player.position.x + player.width / 2,
+                    y: player.position.y
+                },
+                velocity: {
+                    x: 0,
+                    y: player.velocity.y - 5
+                },
+                negVelocity: {
+                    x: 0,
+                    y: player.velocity.y + 5
+                }
+            }));
+        }, 100);
+    }
+
+    if (doubleShot) {
+        laserSound.play();
+        setTimeout(() => {
+            projectiles.push(new Projectile({
+                position: {
+                    x: player.position.x + player.width / 2 - 22,
+                    y: player.position.y
+                },
+                velocity: {
+                    x: 0,
+                    y: player.velocity.y - 5
+                },
+                negVelocity: {
+                    x: 0,
+                    y: player.velocity.y + 5
+                }           
+            }));
+            projectiles.push(new Projectile({
+                position: {
+                    x: player.position.x + player.width / 2 + 22,
+                    y: player.position.y
+                },
+                velocity: {
+                    x: 0,
+                    y: player.velocity.y - 5
+                },
+                negVelocity: {
+                    x: 0,
+                    y: player.velocity.y + 5
+                }           
+            }));
+
+        }, 100);
+    }
 })
 
 window.addEventListener("gamepadconnected", function (e) {
@@ -1010,31 +1050,71 @@ function reportOnGamepad() {
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
         }
+        else {
+            player.rotation = 0;
+        }
 
     }
     
     if (gp.buttons.length > 0) {
        
         if ((gp.buttons[0].pressed || gp.buttons[7].pressed || gp.buttons[5].pressed) && !isPressed && !game.over){
-            laserSound.play();
-                setTimeout(() => {
-                    projectiles.push(new Projectile({
-                        position: {
-                            x: player.position.x + player.width / 2,
-                            y: player.position.y
-                        },
-                        velocity: {
-                            x: 0,
-                            y: player.velocity.y - 5
-                        },
-                        negVelocity: {
-                            x: 0,
-                            y: player.velocity.y + 5
-                        }
-                    }));
-                }, 100);
+            if (!doubleShot) {
+                 laserSound.play();
+                     setTimeout(() => {
+                        projectiles.push(new Projectile({
+                            position: {
+                                 x: player.position.x + player.width / 2,
+                                 y: player.position.y
+                            },
+                            velocity: {
+                                x: 0,
+                                y: player.velocity.y - 5
+                            },
+                            negVelocity: {
+                                x: 0,
+                                y: player.velocity.y + 5
+                            }
+                        }));
+                    }, 100);
+                }
+                if (doubleShot) {
+                    laserSound.play();
+                    setTimeout(() => {
+                        projectiles.push(new Projectile({
+                            position: {
+                                x: player.position.x + player.width / 2 - 22,
+                                y: player.position.y
+                            },
+                            velocity: {
+                                x: 0,
+                                y: player.velocity.y - 5
+                            },
+                            negVelocity: {
+                                x: 0,
+                                y: player.velocity.y + 5
+                            }           
+                        }));
+                        projectiles.push(new Projectile({
+                            position: {
+                                x: player.position.x + player.width / 2 + 22,
+                                y: player.position.y
+                            },
+                            velocity: {
+                                x: 0,
+                                y: player.velocity.y - 5
+                            },
+                            negVelocity: {
+                                x: 0,
+                                y: player.velocity.y + 5
+                            }           
+                        }));
+    
+                    }, 100);
+                }
                 isPressed = true;
             }
+            
         
         if (!gp.buttons[0].pressed && !gp.buttons[7].pressed && !gp.buttons[5].pressed) {
             isPressed = false;
@@ -1044,7 +1124,7 @@ function reportOnGamepad() {
             && player.position.y > -5 && !game.over) {
             player.velocity.x = -speed;
             player.rotation = -rot;
-        }
+        } 
 
         if (gp.buttons[15].pressed && player.position.x + player.width <= canvas.width && //
             player.position.y <= canvas.height - player.height + 5 && player.position.y >= -5 && !game.over) {
@@ -1071,6 +1151,7 @@ function reportOnGamepad() {
             isPressedReset = false;
         }
     }
+    
 }
 
 
@@ -1104,7 +1185,7 @@ addEventListener('keydown', ({ key }) => {
             keys.s.pressed = true;
             break;
         case ' ':
-            if (!keys.space.pressed) {
+            if (!keys.space.pressed && !doubleShot) {
                 laserSound.play();
                 setTimeout(() => {
                     projectiles.push(new Projectile({
@@ -1123,9 +1204,42 @@ addEventListener('keydown', ({ key }) => {
                     }));
                 }, 100);
             }
-            if (!laserShot) {
-               keys.space.pressed = true;
+            
+            if (!keys.space.pressed && doubleShot) {
+                laserSound.play();
+                setTimeout(() => {
+                    projectiles.push(new Projectile({
+                        position: {
+                            x: player.position.x + player.width / 2 - 22,
+                            y: player.position.y
+                        },
+                        velocity: {
+                            x: 0,
+                            y: player.velocity.y - 5
+                        },
+                        negVelocity: {
+                            x: 0,
+                            y: player.velocity.y + 5
+                        }           
+                    }));
+                    projectiles.push(new Projectile({
+                        position: {
+                            x: player.position.x + player.width / 2 + 22,
+                            y: player.position.y
+                        },
+                        velocity: {
+                            x: 0,
+                            y: player.velocity.y - 5
+                        },
+                        negVelocity: {
+                            x: 0,
+                            y: player.velocity.y + 5
+                        }           
+                    }));
+
+                }, 100);
             }
+            keys.space.pressed = true;
             break;
 
     }
@@ -1164,7 +1278,7 @@ addEventListener('keyup', ({ key }) => {
             keys.s.pressed = false;
             break;
         case ' ':
-            keys.space.pressed = false;
+             keys.space.pressed = false;
             break;
 
     }
