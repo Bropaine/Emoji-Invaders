@@ -411,6 +411,54 @@ class EndGame {
 
 }
 
+class Planet {
+    constructor() {
+
+        const image = new Image();
+        image.src = planetSprite;
+        this.position = {
+            x: 0,
+            y: 0
+        },
+        this.velocity = {
+            x: 0,
+            y: 0
+        };
+        image.onload = () => {
+           
+            //Shrink image and maintain the aspect ratio
+            const scale = 1;
+            this.width = image.width * scale;
+            this.height = image.height * scale;
+            this.opacity = 1;
+            this.position = {
+                x: Math.floor(Math.random() * canvas.width),
+                y: 0
+            },
+            this.velocity = {
+                x: 0,
+                y: 0.15
+            };
+           
+        }
+        this.image = image;
+    }
+
+    draw() {
+
+       c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+
+    }
+
+    update() {
+        
+        this.position.y += this.velocity.y;
+        this.draw();
+    }
+
+}
+
+
 class PowerUp {
     constructor({ position, velocity, radius, color, fades }) {
         this.position = position;
@@ -483,7 +531,8 @@ class PowerUp {
  }, 30000)
 
 
- 
+
+const planets = [];
 let powerup;
 const player = new Player();
 const endGame = new EndGame();
@@ -522,6 +571,7 @@ let game = {
     active: true
 }
 
+let planetSprite = './assets/planet01.png';
 let playerProjectileSprite = './assets/shipbeam.png';
 let enemySprite = './assets/invader.png';
 let enemyWidth = 30;
@@ -571,6 +621,8 @@ function createPowerUp() {
         fades: false
     })
 }
+
+
 function createParticles({ object, color, fades, num }) {
     //particle effect when enemy is hit
     this.num = num;
@@ -609,23 +661,26 @@ function createStars({ num, color }) {
             color: color
         }));
     }
-
-
+    
 }
 
 function stars(starColor, num) {
     this.starColor = starColor;
     this.num = num;
+    createPlanets();
     createStars({
         color: starColor,
         num: num
     })
 
 }
-
+function  createPlanets() {
+    planets.push(new Planet());
+    
+  }
  
 function animate() {
-
+   
     if (!game.active) {
         music.stop();
         music02.stop();
@@ -653,6 +708,7 @@ function animate() {
         }
 
     } else if (score > 5000 && score <= 12000) {
+        planetSprite = './assets/planet02.png';
         ProjectileVelocity = 2;
         enemySpeed = 1.5;
         enemySpawn = 1500;
@@ -668,6 +724,7 @@ function animate() {
         }
 
     } else if (score > 12000 && score <= 20000) {
+        planetSprite = './assets/planet03.png';
         ProjectileVelocity = 2;
         enemySpeed = 2;
         enemySpawn = 1000;
@@ -688,6 +745,7 @@ function animate() {
         }
 
     } else if (score > 20000 && score <= 30000) {
+        planetSprite = './assets/planet05.png';
         ProjectileVelocity = 3;
         enemySpeed = 2.5;
         enemySpawn = 1000;
@@ -703,6 +761,7 @@ function animate() {
         }
 
     } else if (score > 30000 && score <= 50000) {
+        planetSprite = './assets/planet04.png';
         ProjectileVelocity = 3;
         enemySpeed = 3;
         enemySpawn = 1000;
@@ -713,6 +772,7 @@ function animate() {
         particleColor = '#805023'
 
     } else if (score > 50000 && score <= 75000) {
+        planetSprite = './assets/planet01.png';
         ProjectileVelocity = 4;
         enemySpeed = 3.5;
         enemySpawn = 500;
@@ -728,6 +788,7 @@ function animate() {
         }
 
     } else if (score > 75000 && score <= 100000) {
+        planetSprite = './assets/planet06.png';
         ProjectileVelocity = 4;
         enemySpeed = 3.75;
         enemySpawn = 500;
@@ -744,6 +805,7 @@ function animate() {
     }
 
     else if (score > 100000 && score <= 150000) {
+        planetSprite = './assets/planet06.png';
         ProjectileVelocity = 5;
         enemySpeed = 4;
         enemySpawn = 500;
@@ -754,6 +816,7 @@ function animate() {
         enemyLaserColor = 'green';
 
     } else if (score > 150000 && score <= 200000) {
+        planetSprite = './assets/planet07.png';
         ProjectileVelocity = 5;
         enemySpeed = 4.5;
         enemySpawn = 250;
@@ -764,6 +827,7 @@ function animate() {
         enemyLaserColor = 'green';
 
     } else if (score > 200000) {
+        planetSprite = './assets/planet08.png';
         ProjectileVelocity = 5.5;
         enemySpeed = 4.75;
         enemySpawn = 250;
@@ -790,10 +854,6 @@ function animate() {
     requestAnimationFrame(animate);
     c.fillStyle = 'black';
     c.fillRect(0, 0, canvas.width, canvas.height);
-    if(powerup) {
-        powerup.update();
-    }
-   // player.update();
 
     particles.forEach((particle, i) => {
         if (particle.position.y - particle.radius >= canvas.height) {
@@ -808,6 +868,14 @@ function animate() {
             particle.update();
         }
     })
+    if(planets){
+        planets.forEach((planet) => {
+            planet.update();
+        })
+       }
+       if(powerup) {
+        powerup.update();
+    }
     invaderProjectiles.forEach((invaderProjectile, index) => {
         if (invaderProjectile.position.y + invaderProjectile.height >= canvas.height) {
             setTimeout(() => {
@@ -853,8 +921,7 @@ function animate() {
             projectile.update();
         }
     })
-
-    player.update();
+    
     grids.forEach((grid, gridIndex) => {
         grid.update();
         //spawn projectiles
@@ -937,7 +1004,8 @@ function animate() {
         player.velocity.x = 0;
         player.rot = 0;
     }
-
+    
+    player.update();
 
     //randomly spawn invaders
     if (frames % randomInterval === 0) {
@@ -947,6 +1015,7 @@ function animate() {
     }
     
     frames++;
+    
 }
 
 animate();
@@ -1282,4 +1351,5 @@ addEventListener('keyup', ({ key }) => {
             break;
 
     }
+   
 }) 
