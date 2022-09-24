@@ -1,3 +1,9 @@
+const endScore = document.querySelector('#endScore');
+const endScoreEl = document.querySelector('#endScoreEl');
+const bonusEl = document.querySelector('#bonusEl');
+const totalScoreEl = document.querySelector('#totalScoreEl');
+const bonus = document.querySelector('#bonus');
+const totalScore = document.querySelector('#totalScore');
 const accuracyEl = document.querySelector('#accuracyEl');
 const highScoreEl = document.querySelector('#highScoreEl');
 const scoreEl = document.querySelector('#scoreEl');
@@ -76,7 +82,7 @@ class Player {
             this.opacity = 1;
             this.position = {
                 x: canvas.width / 2 - this.width / 2,
-                y: canvas.height - this.height 
+                y: canvas.height - this.height
             }
 
             this.rotation = 0;
@@ -128,10 +134,10 @@ class Projectile {
             this.opacity = 1;
             this.position = {
                 x: this.position.x - 5,
-                y: this.position.y 
+                y: this.position.y
             }
+        }
     }
-}
 
     draw() {
         /*
@@ -351,7 +357,7 @@ class Grid {
                 num: 1
             })
         }
-//collision if player hits invaders
+        //collision if player hits invaders
         if (this.position.y + this.height > Math.floor(player.position.y) && this.position.x + this.width > //
             player.position.x && this.position.x < Math.floor(player.position.x) + player.width && this.position.y < Math.floor(player.position.y) + player.height) {
             setTimeout(() => {
@@ -402,11 +408,13 @@ class EndGame {
     draw() {
 
         c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
-
+        bonus.removeAttribute('hidden');
+        totalScore.removeAttribute('hidden');
+        endScore.removeAttribute('hidden');
     }
 
     update() {
-
+        calcEndgame();
         this.draw();
     }
 
@@ -421,12 +429,12 @@ class Planet {
             x: 0,
             y: 0
         },
-        this.velocity = {
-            x: 0,
-            y: 0
-        };
+            this.velocity = {
+                x: 0,
+                y: 0
+            };
         image.onload = () => {
-           
+
             //Shrink image and maintain the aspect ratio
             const scale = 1;
             this.width = image.width * scale;
@@ -436,23 +444,23 @@ class Planet {
                 x: Math.floor(Math.random() * canvas.width),
                 y: 0
             },
-            this.velocity = {
-                x: 0,
-                y: 0.15
-            };
-           
+                this.velocity = {
+                    x: 0,
+                    y: 0.15
+                };
+
         }
         this.image = image;
     }
 
     draw() {
 
-       c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+        c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
 
     }
 
     update() {
-        
+
         this.position.y += this.velocity.y;
         this.draw();
     }
@@ -484,7 +492,7 @@ class PowerUp {
                 break;
             case 3:
                 this.color = 'red'
-                break;       
+                break;
         }
 
         c.save();
@@ -496,40 +504,40 @@ class PowerUp {
         c.fill();
         c.closePath();
         c.restore();
-        
+
     }
 
     update() {
-        if (!this.fades){
+        if (!this.fades) {
             this.draw();
         }
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
 
         if (powerup.position.y + powerup.radius > Math.floor(player.position.y) && powerup.position.x + powerup.radius > //
-        player.position.x && powerup.position.x < Math.floor(player.position.x) + player.width && powerup.position.y < Math.floor(player.position.y) + player.height) {
+            player.position.x && powerup.position.x < Math.floor(player.position.x) + player.width && powerup.position.y < Math.floor(player.position.y) + player.height) {
             console.log("Boom!");
             this.fades = true;
-          
-                doubleShot = true;
-                
+
+            doubleShot = true;
+
             powerUpSound.play();
             powerUpSound.volume(0.5);
-           
+
             setTimeout(() => {
                 doubleShot = false;
 
-            },10000)
-            
+            }, 10000)
+
         }
     }
 }
 
- setInterval(() => {
+setInterval(() => {
 
     createPowerUp();
 
- }, 30000)
+}, 30000)
 
 
 
@@ -597,14 +605,13 @@ let shotCount = 0;
 let shotHit = 0;
 let shotMiss = 0;
 
-
 highScore = localStorage.getItem(localStorageName) == null ? 0 :
-            localStorage.getItem(localStorageName);
-            highScoreEl.innerHTML = highScore;
+    localStorage.getItem(localStorageName);
+highScoreEl.innerHTML = highScore;
 
-function calcHighScore () {
+function calcHighScore() {
     highScore = Math.max(score, highScore);
-    localStorage.setItem(localStorageName, highScore);   
+    localStorage.setItem(localStorageName, highScore);
     if (highScore == score) {
         highScoreEl.style.color = 'green';
     }
@@ -614,7 +621,7 @@ function calcHighScore () {
 function createPowerUp() {
     powerup = new PowerUp({
         position: {
-            x: Math.floor(Math.random() * canvas.width), 
+            x: Math.floor(Math.random() * canvas.width),
             y: Math.floor(Math.random() * canvas.height)
         },
         velocity: {
@@ -666,7 +673,7 @@ function createStars({ num, color }) {
             color: color
         }));
     }
-    
+
 }
 
 function stars(starColor, num) {
@@ -679,19 +686,48 @@ function stars(starColor, num) {
     })
 
 }
-function  createPlanets() {
+function createPlanets() {
     planets.push(new Planet());
-    
-  }
+
+}
 
 function calcAccuracy() {
     shotMiss = shotCount - shotHit;
     return ((shotCount - shotMiss) / shotCount * 100).toFixed(1);
-    
-}  
- 
+
+}
+
+function calcAccuracyBonus() {
+    let accuracyBonusPercent = 0;
+    console.log(calcAccuracy());
+    if (calcAccuracy() >= 100) {
+        accuracyBonusPercent = 1.0;
+    } else if (calcAccuracy() < 100 && calcAccuracy() >= 90) {
+        accuracyBonusPercent = .75;
+    } else if (calcAccuracy() < 90 && calcAccuracy() >= 80) {
+        accuracyBonusPercent = .5;
+    } else if (calcAccuracy() < 80 && calcAccuracy() >= 70) {
+        accuracyBonusPercent = .25;
+    } else if (calcAccuracy() < 70 && calcAccuracy() >= 60) {
+        accuracyBonusPercent = .1;
+    }
+    return score * accuracyBonusPercent;
+}
+
+function calcEndgame() {
+    let scoreTotal = 0;
+    bonusEl.innerHTML = calcAccuracyBonus();
+    scoreTotal = score + calcAccuracyBonus();
+    endScoreEl.innerHTML = score;
+    score = scoreTotal;
+    totalScoreEl.innerHTML = scoreTotal;
+    scoreEl.innerHTML = scoreTotal;
+    calcHighScore();
+    highScoreEl.innerHTML = highScore;
+}
+
 function animate() {
-   
+
     if (!game.active) {
         music.stop();
         music02.stop();
@@ -879,12 +915,12 @@ function animate() {
             particle.update();
         }
     })
-    if(planets){
+    if (planets) {
         planets.forEach((planet) => {
             planet.update();
         })
-       }
-       if(powerup) {
+    }
+    if (powerup) {
         powerup.update();
     }
     player.update();
@@ -897,14 +933,14 @@ function animate() {
 
         //player.position.x + player.width is right side of player
     } else if (keys.d.pressed && player.position.x + player.width <= canvas.width && //
-        player.position.y <= canvas.height - player.height  && player.position.y >= 0) {
+        player.position.y <= canvas.height - player.height && player.position.y >= 0) {
         player.velocity.x = speed;
         player.rotation = rot;
     } else if (keys.w.pressed && player.position.y >= 0 && //
         player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
         player.velocity.y = -speed;
-    } else if (keys.s.pressed && player.position.y <= canvas.height - player.height -5 && //
-        player.position.x >= -5 && player.position.x + player.width <= canvas.width +5) {
+    } else if (keys.s.pressed && player.position.y <= canvas.height - player.height - 5 && //
+        player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
         player.velocity.y = speed;
     }
     else {
@@ -912,7 +948,7 @@ function animate() {
         player.velocity.x = 0;
         player.rot = 0;
     }
-    
+
     invaderProjectiles.forEach((invaderProjectile, index) => {
         if (invaderProjectile.position.y + invaderProjectile.height >= canvas.height) {
             setTimeout(() => {
@@ -960,7 +996,7 @@ function animate() {
             projectile.update();
         }
     })
-    
+
     grids.forEach((grid, gridIndex) => {
         grid.update();
         //spawn projectiles
@@ -973,11 +1009,11 @@ function animate() {
             //collision detection and enemy removal
             //projectiles hit enemy
             projectiles.forEach((projectile, j) => {
-                if (projectile.position.y  <= invader.position.y + invader.height && projectile.position.x  //
-                    >= invader.position.x && projectile.position.x  <= invader.position.x + invader.width && projectile.position.y //
-                     >= invader.position.y) {
-                    shotCount++;    
-                    shotHit++;    
+                if (projectile.position.y <= invader.position.y + invader.height && projectile.position.x  //
+                    >= invader.position.x && projectile.position.x <= invader.position.x + invader.width && projectile.position.y //
+                    >= invader.position.y) {
+                    shotCount++;
+                    shotHit++;
                     setTimeout(() => {
                         //check if invader is in parent grid array
                         const invaderFound = grid.invaders.find(invader2 => {
@@ -1020,7 +1056,7 @@ function animate() {
 
         })
     })
-    
+
 
     //randomly spawn invaders
     if (frames % randomInterval === 0) {
@@ -1028,14 +1064,14 @@ function animate() {
         randomInterval = Math.floor((Math.random() * enemySpawn) + 1000);
         frames = 0;
     }
-    
+
     frames++;
-    
+
 }
 
 animate();
 
-document.querySelector("#fireButton").addEventListener("click", function() {
+document.querySelector("#fireButton").addEventListener("click", function () {
     if (!doubleShot) {
         laserSound.play();
         setTimeout(() => {
@@ -1071,7 +1107,7 @@ document.querySelector("#fireButton").addEventListener("click", function() {
                 negVelocity: {
                     x: 0,
                     y: player.velocity.y + 5
-                }           
+                }
             }));
             projectiles.push(new Projectile({
                 position: {
@@ -1085,7 +1121,7 @@ document.querySelector("#fireButton").addEventListener("click", function() {
                 negVelocity: {
                     x: 0,
                     y: player.velocity.y + 5
-                }           
+                }
             }));
 
         }, 100);
@@ -1109,10 +1145,10 @@ window.addEventListener("gamepaddisconnected", function (e) {
 
 function reportOnGamepad() {
     let gp = navigator.getGamepads()[0];
-    
+
     if (gp.axes.length > 0) {
-       
-        if (gp.axes[0] < -0.5  && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5  //
+
+        if (gp.axes[0] < -0.5 && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5  //
             && player.position.y > -5 && !game.over) {
             player.velocity.x = -speed;
             player.rotation = -rot;
@@ -1139,95 +1175,95 @@ function reportOnGamepad() {
         }
 
     }
-    
+
     if (gp.buttons.length > 0) {
-       
-        if ((gp.buttons[0].pressed || gp.buttons[7].pressed || gp.buttons[5].pressed) && !isPressed && !game.over){
+
+        if ((gp.buttons[0].pressed || gp.buttons[7].pressed || gp.buttons[5].pressed) && !isPressed && !game.over) {
             if (!doubleShot) {
-                 laserSound.play();
-                     setTimeout(() => {
-                        projectiles.push(new Projectile({
-                            position: {
-                                 x: player.position.x + player.width / 2,
-                                 y: player.position.y
-                            },
-                            velocity: {
-                                x: 0,
-                                y: player.velocity.y - 5
-                            },
-                            negVelocity: {
-                                x: 0,
-                                y: player.velocity.y + 5
-                            }
-                        }));
-                    }, 100);
-                }
-                if (doubleShot) {
-                    laserSound.play();
-                    setTimeout(() => {
-                        projectiles.push(new Projectile({
-                            position: {
-                                x: player.position.x + player.width / 2 - 22,
-                                y: player.position.y
-                            },
-                            velocity: {
-                                x: 0,
-                                y: player.velocity.y - 5
-                            },
-                            negVelocity: {
-                                x: 0,
-                                y: player.velocity.y + 5
-                            }           
-                        }));
-                        projectiles.push(new Projectile({
-                            position: {
-                                x: player.position.x + player.width / 2 + 22,
-                                y: player.position.y
-                            },
-                            velocity: {
-                                x: 0,
-                                y: player.velocity.y - 5
-                            },
-                            negVelocity: {
-                                x: 0,
-                                y: player.velocity.y + 5
-                            }           
-                        }));
-    
-                    }, 100);
-                }
-                isPressed = true;
+                laserSound.play();
+                setTimeout(() => {
+                    projectiles.push(new Projectile({
+                        position: {
+                            x: player.position.x + player.width / 2,
+                            y: player.position.y
+                        },
+                        velocity: {
+                            x: 0,
+                            y: player.velocity.y - 5
+                        },
+                        negVelocity: {
+                            x: 0,
+                            y: player.velocity.y + 5
+                        }
+                    }));
+                }, 100);
             }
-            
-        
+            if (doubleShot) {
+                laserSound.play();
+                setTimeout(() => {
+                    projectiles.push(new Projectile({
+                        position: {
+                            x: player.position.x + player.width / 2 - 22,
+                            y: player.position.y
+                        },
+                        velocity: {
+                            x: 0,
+                            y: player.velocity.y - 5
+                        },
+                        negVelocity: {
+                            x: 0,
+                            y: player.velocity.y + 5
+                        }
+                    }));
+                    projectiles.push(new Projectile({
+                        position: {
+                            x: player.position.x + player.width / 2 + 22,
+                            y: player.position.y
+                        },
+                        velocity: {
+                            x: 0,
+                            y: player.velocity.y - 5
+                        },
+                        negVelocity: {
+                            x: 0,
+                            y: player.velocity.y + 5
+                        }
+                    }));
+
+                }, 100);
+            }
+            isPressed = true;
+        }
+
+
         if (!gp.buttons[0].pressed && !gp.buttons[7].pressed && !gp.buttons[5].pressed) {
             isPressed = false;
         }
-        
+
         if (gp.buttons[14].pressed && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5   //
             && player.position.y > -5 && !game.over) {
             player.velocity.x = -speed;
             player.rotation = -rot;
-        } 
+        }
 
-      else if (gp.buttons[15].pressed && player.position.x + player.width <= canvas.width && //
+        else if (gp.buttons[15].pressed && player.position.x + player.width <= canvas.width && //
             player.position.y <= canvas.height - player.height + 5 && player.position.y >= -5 && !game.over) {
             player.velocity.x = speed;
             player.rotation = rot;
         }
 
-      else if ((gp.buttons[12].pressed) && player.position.y >= -5 && //
-            player.position.x >= -5 && player.position.x + player.width <= canvas.width +5 && !game.over) {
+        else if ((gp.buttons[12].pressed) && player.position.y >= -5 && //
+            player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = -speed;
         }
 
-      else if (gp.buttons[13].pressed && player.position.y <= canvas.height - player.height && //
+        else if (gp.buttons[13].pressed && player.position.y <= canvas.height - player.height && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
         }
-      else if (!(gp.axes[0] < -0.5) && !(gp.axes[0] > 0.5) && !(keys.a.pressed) && !(keys.d.pressed)) {
-         player.rotation = 0;
-      }  
+        else if (!(gp.axes[0] < -0.5) && !(gp.axes[0] > 0.5) && !(keys.a.pressed) && !(keys.d.pressed)) {
+            player.rotation = 0;
+        }
         if (gp.buttons[9].pressed && !isPressedReset) {
             let reset = document.getElementById("buttonImage");
             reset.click();
@@ -1237,13 +1273,13 @@ function reportOnGamepad() {
             isPressedReset = false;
         }
     }
-    
+
 }
 
 
 addEventListener('keydown', ({ key }) => {
     if (game.over) return;
-    
+
     switch (key) {
 
         case 'a':
@@ -1290,7 +1326,7 @@ addEventListener('keydown', ({ key }) => {
                     }));
                 }, 100);
             }
-            
+
             if (!keys.space.pressed && doubleShot) {
                 laserSound.play();
                 setTimeout(() => {
@@ -1306,7 +1342,7 @@ addEventListener('keydown', ({ key }) => {
                         negVelocity: {
                             x: 0,
                             y: player.velocity.y + 5
-                        }           
+                        }
                     }));
                     projectiles.push(new Projectile({
                         position: {
@@ -1320,7 +1356,7 @@ addEventListener('keydown', ({ key }) => {
                         negVelocity: {
                             x: 0,
                             y: player.velocity.y + 5
-                        }           
+                        }
                     }));
 
                 }, 100);
@@ -1332,9 +1368,9 @@ addEventListener('keydown', ({ key }) => {
 })
 
 addEventListener('keyup', ({ key }) => {
-    
+
     switch (key) {
-      
+
         case 'a':
             keys.a.pressed = false;
             player.rotation = 0;
@@ -1364,9 +1400,9 @@ addEventListener('keyup', ({ key }) => {
             keys.s.pressed = false;
             break;
         case ' ':
-             keys.space.pressed = false;
+            keys.space.pressed = false;
             break;
 
     }
-   
+
 }) 
