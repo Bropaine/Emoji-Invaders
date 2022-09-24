@@ -950,9 +950,10 @@ function animate() {
         }
     })
     projectiles.forEach((projectile, index) => {
-        if (projectile.position.y + projectile.height <= 0) {
+        if (projectile.position.y - projectile.height <= 0) {
             setTimeout(() => {
                 projectiles.splice(index, 1);
+                shotCount++;
                 accuracyEl.innerHTML = calcAccuracy();
             }, 0);
         } else {
@@ -975,6 +976,7 @@ function animate() {
                 if (projectile.position.y  <= invader.position.y + invader.height && projectile.position.x  //
                     >= invader.position.x && projectile.position.x  <= invader.position.x + invader.width && projectile.position.y //
                      >= invader.position.y) {
+                    shotCount++;    
                     shotHit++;    
                     setTimeout(() => {
                         //check if invader is in parent grid array
@@ -1036,7 +1038,6 @@ animate();
 document.querySelector("#fireButton").addEventListener("click", function() {
     if (!doubleShot) {
         laserSound.play();
-        shotCount++;
         setTimeout(() => {
             projectiles.push(new Projectile({
                 position: {
@@ -1057,7 +1058,6 @@ document.querySelector("#fireButton").addEventListener("click", function() {
 
     if (doubleShot) {
         laserSound.play();
-        shotCount++;
         setTimeout(() => {
             projectiles.push(new Projectile({
                 position: {
@@ -1145,7 +1145,6 @@ function reportOnGamepad() {
         if ((gp.buttons[0].pressed || gp.buttons[7].pressed || gp.buttons[5].pressed) && !isPressed && !game.over){
             if (!doubleShot) {
                  laserSound.play();
-                 shotCount++;
                      setTimeout(() => {
                         projectiles.push(new Projectile({
                             position: {
@@ -1165,7 +1164,6 @@ function reportOnGamepad() {
                 }
                 if (doubleShot) {
                     laserSound.play();
-                    shotCount++;
                     setTimeout(() => {
                         projectiles.push(new Projectile({
                             position: {
@@ -1273,7 +1271,6 @@ addEventListener('keydown', ({ key }) => {
         case ' ':
             if (!keys.space.pressed && !doubleShot) {
                 laserSound.play();
-                shotCount++;
                 setTimeout(() => {
                     projectiles.push(new Projectile({
                         position: {
@@ -1294,7 +1291,6 @@ addEventListener('keydown', ({ key }) => {
             
             if (!keys.space.pressed && doubleShot) {
                 laserSound.play();
-                shotCount++;
                 setTimeout(() => {
                     projectiles.push(new Projectile({
                         position: {
