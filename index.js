@@ -1,3 +1,4 @@
+const accuracyEl = document.querySelector('#accuracyEl');
 const highScoreEl = document.querySelector('#highScoreEl');
 const scoreEl = document.querySelector('#scoreEl');
 const levelEl = document.querySelector('#levelEl');
@@ -592,6 +593,10 @@ let executed = false;
 let isPressed = false;
 let isPressedReset = false;
 let doubleShot = false;
+let shotCount = 0;
+let shotHit = 0;
+let shotMiss = 0;
+
 
 highScore = localStorage.getItem(localStorageName) == null ? 0 :
             localStorage.getItem(localStorageName);
@@ -678,6 +683,12 @@ function  createPlanets() {
     planets.push(new Planet());
     
   }
+
+function calcAccuracy() {
+    shotMiss = shotCount - shotHit;
+    return ((shotCount - shotMiss) / shotCount * 100).toFixed(1);
+    
+}  
  
 function animate() {
    
@@ -876,6 +887,32 @@ function animate() {
        if(powerup) {
         powerup.update();
     }
+    player.update();
+    //player movement and canvas boundry
+    //player.position.x is left side of player
+    if (keys.a.pressed && player.position.x >= 0 && player.position.y <= canvas.height - player.height   //
+        && player.position.y > 0) {
+        player.velocity.x = -speed;
+        player.rotation = -rot;
+
+        //player.position.x + player.width is right side of player
+    } else if (keys.d.pressed && player.position.x + player.width <= canvas.width && //
+        player.position.y <= canvas.height - player.height  && player.position.y >= 0) {
+        player.velocity.x = speed;
+        player.rotation = rot;
+    } else if (keys.w.pressed && player.position.y >= 0 && //
+        player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
+        player.velocity.y = -speed;
+    } else if (keys.s.pressed && player.position.y <= canvas.height - player.height -5 && //
+        player.position.x >= -5 && player.position.x + player.width <= canvas.width +5) {
+        player.velocity.y = speed;
+    }
+    else {
+        player.velocity.y = 0;
+        player.velocity.x = 0;
+        player.rot = 0;
+    }
+    
     invaderProjectiles.forEach((invaderProjectile, index) => {
         if (invaderProjectile.position.y + invaderProjectile.height >= canvas.height) {
             setTimeout(() => {
@@ -913,9 +950,10 @@ function animate() {
         }
     })
     projectiles.forEach((projectile, index) => {
-        if (projectile.position.y + projectile.radius <= 0) {
+        if (projectile.position.y + projectile.height <= 0) {
             setTimeout(() => {
                 projectiles.splice(index, 1);
+                accuracyEl.innerHTML = calcAccuracy();
             }, 0);
         } else {
             projectile.update();
@@ -937,7 +975,7 @@ function animate() {
                 if (projectile.position.y  <= invader.position.y + invader.height && projectile.position.x  //
                     >= invader.position.x && projectile.position.x  <= invader.position.x + invader.width && projectile.position.y //
                      >= invader.position.y) {
-
+                    shotHit++;    
                     setTimeout(() => {
                         //check if invader is in parent grid array
                         const invaderFound = grid.invaders.find(invader2 => {
@@ -951,7 +989,6 @@ function animate() {
                             score += 100;
                             highScoreEl.innerHTML = calcHighScore();
                             scoreEl.innerHTML = score;
-                            
                             createParticles({
                                 object: invader,
                                 color: particleColor,
@@ -960,6 +997,7 @@ function animate() {
                             });
                             grid.invaders.splice(i, 1);
                             projectiles.splice(j, 1);
+                            accuracyEl.innerHTML = calcAccuracy();
 
                             if (grid.invaders.length > 0) {
                                 const firstInvader = grid.invaders[0];
@@ -980,32 +1018,7 @@ function animate() {
 
         })
     })
-    //player movement and canvas boundry
-    //player.position.x is left side of player
-    if (keys.a.pressed && player.position.x >= 0 && player.position.y <= canvas.height - player.height   //
-        && player.position.y > 0) {
-        player.velocity.x = -speed;
-        player.rotation = -rot;
-
-        //player.position.x + player.width is right side of player
-    } else if (keys.d.pressed && player.position.x + player.width <= canvas.width && //
-        player.position.y <= canvas.height - player.height  && player.position.y >= 0) {
-        player.velocity.x = speed;
-        player.rotation = rot;
-    } else if (keys.w.pressed && player.position.y >= 0 && //
-        player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
-        player.velocity.y = -speed;
-    } else if (keys.s.pressed && player.position.y <= canvas.height - player.height -5 && //
-        player.position.x >= -5 && player.position.x + player.width <= canvas.width +5) {
-        player.velocity.y = speed;
-    }
-    else {
-        player.velocity.y = 0;
-        player.velocity.x = 0;
-        player.rot = 0;
-    }
     
-    player.update();
 
     //randomly spawn invaders
     if (frames % randomInterval === 0) {
@@ -1023,6 +1036,7 @@ animate();
 document.querySelector("#fireButton").addEventListener("click", function() {
     if (!doubleShot) {
         laserSound.play();
+        shotCount++;
         setTimeout(() => {
             projectiles.push(new Projectile({
                 position: {
@@ -1043,6 +1057,7 @@ document.querySelector("#fireButton").addEventListener("click", function() {
 
     if (doubleShot) {
         laserSound.play();
+        shotCount++;
         setTimeout(() => {
             projectiles.push(new Projectile({
                 position: {
@@ -1120,7 +1135,7 @@ function reportOnGamepad() {
             player.velocity.y = speed;
         }
         else {
-            player.rotation = 0;
+            //player.rotation = 0;
         }
 
     }
@@ -1130,6 +1145,7 @@ function reportOnGamepad() {
         if ((gp.buttons[0].pressed || gp.buttons[7].pressed || gp.buttons[5].pressed) && !isPressed && !game.over){
             if (!doubleShot) {
                  laserSound.play();
+                 shotCount++;
                      setTimeout(() => {
                         projectiles.push(new Projectile({
                             position: {
@@ -1149,6 +1165,7 @@ function reportOnGamepad() {
                 }
                 if (doubleShot) {
                     laserSound.play();
+                    shotCount++;
                     setTimeout(() => {
                         projectiles.push(new Projectile({
                             position: {
@@ -1256,6 +1273,7 @@ addEventListener('keydown', ({ key }) => {
         case ' ':
             if (!keys.space.pressed && !doubleShot) {
                 laserSound.play();
+                shotCount++;
                 setTimeout(() => {
                     projectiles.push(new Projectile({
                         position: {
@@ -1276,6 +1294,7 @@ addEventListener('keydown', ({ key }) => {
             
             if (!keys.space.pressed && doubleShot) {
                 laserSound.play();
+                shotCount++;
                 setTimeout(() => {
                     projectiles.push(new Projectile({
                         position: {
