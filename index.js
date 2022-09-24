@@ -1210,22 +1210,24 @@ function reportOnGamepad() {
             player.rotation = -rot;
         } 
 
-        if (gp.buttons[15].pressed && player.position.x + player.width <= canvas.width && //
+      else if (gp.buttons[15].pressed && player.position.x + player.width <= canvas.width && //
             player.position.y <= canvas.height - player.height + 5 && player.position.y >= -5 && !game.over) {
             player.velocity.x = speed;
             player.rotation = rot;
         }
 
-        if ((gp.buttons[12].pressed) && player.position.y >= -5 && //
+      else if ((gp.buttons[12].pressed) && player.position.y >= -5 && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width +5 && !game.over) {
             player.velocity.y = -speed;
         }
 
-        if (gp.buttons[13].pressed && player.position.y <= canvas.height - player.height && //
+      else if (gp.buttons[13].pressed && player.position.y <= canvas.height - player.height && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
         }
-
+      else if (!(gp.axes[0] < -0.5) && !(gp.axes[0] > 0.5) && !(keys.a.pressed) && !(keys.d.pressed)) {
+         player.rotation = 0;
+      }  
         if (gp.buttons[9].pressed && !isPressedReset) {
             let reset = document.getElementById("buttonImage");
             reset.click();
