@@ -1,4 +1,12 @@
 const endScore = document.querySelector('#endScore');
+const levelTag = document.querySelector('#levelTag');
+const accuracyEndTag = document.querySelector('#accuracyEndTag');
+const accuracyEndEl = document.querySelector('#accuracyEndEl');
+const endHighScoreTag = document.querySelector('#highScoreEnd');
+const endHighScoreEl = document.querySelector('#highScoreEndEl');
+const accuracyTag = document.querySelector('#accuracyTag');
+const startScore = document.querySelector('#score');
+const highScoreTag = document.querySelector('#highScore');
 const endScoreEl = document.querySelector('#endScoreEl');
 const bonusEl = document.querySelector('#bonusEl');
 const totalScoreEl = document.querySelector('#totalScoreEl');
@@ -140,14 +148,7 @@ class Projectile {
     }
 
     draw() {
-        /*
-        c.beginPath();
-        //Math.PI * 2 creates the full circle with arc()
-        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-        c.fillStyle = playerProjectileColor;
-        c.fill();
-        c.closePath();
-        */
+        
         c.drawImage(
             this.image,
             this.position.x,
@@ -164,12 +165,7 @@ class Projectile {
             this.position.y -= this.negVelocity.y;
             this.position.y += this.velocity.y;
         }
-        /*
-        this.draw();
-        this.position.x += this.velocity.x;
-        this.position.y -= this.negVelocity.y;
-        this.position.y += this.velocity.y;
-        */
+       
     }
 }
 
@@ -406,15 +402,94 @@ class EndGame {
     }
 
     draw() {
-
+        startScreenUpdate()
         c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+        accuracyEndEl.innerHTML = calcAccuracy();
+        if (calcAccuracy().includes(NaN)) {
+            accuracyEndEl.innerHTML= 0.0;
+        }
+        endHighScoreEl.innerHTML = highScore;        
+        startScore.style.visibility = 'hidden';
+        accuracyTag.style.visibility = 'hidden';
+        levelTag.style.visibility = 'hidden';
+        highScoreTag.style.visibility = 'hidden';
         bonus.removeAttribute('hidden');
         totalScore.removeAttribute('hidden');
         endScore.removeAttribute('hidden');
+        endHighScoreTag.removeAttribute('hidden');
+        accuracyEndTag.removeAttribute('hidden');
+        
     }
 
     update() {
         calcEndgame();
+        this.draw();
+    }
+
+}
+
+class StartGame {
+    constructor() {
+
+        const image = new Image();
+        image.src = './assets/splashScreen01.png'
+        image.onload = () => {
+           
+            //Shrink image and maintain the aspect ratio
+            const scale = .65;
+            this.width = image.width * scale;
+            this.height = image.height * scale;
+            this.opacity = 1;
+            this.position = {
+                x: canvas.width / 2 - this.width / 2,
+                y: canvas.height / 2 - this.height / 2
+            }
+        }
+        this.image = image;
+    }
+
+    draw() {
+        
+        c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+        if (!game.over) {
+            
+                pressStart.update();     
+        }
+    }
+
+    update() {
+       
+        this.draw();
+    }
+
+}
+class PressStart {
+    constructor() {
+
+        const image = new Image();
+        image.src = './assets/pressStart.png'
+        image.onload = () => {
+           
+            //Shrink image and maintain the aspect ratio
+            const scale = .75;
+            this.width = image.width * scale;
+            this.height = image.height * scale;
+            this.opacity = 1;
+            this.position = {
+                x: canvas.width / 2 - this.width / 2,
+                y: canvas.height / 2 - this.height / 2 + 50
+            }
+        }
+        this.image = image;
+    }
+
+    draw() {
+        
+        c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+    }
+
+    update() {
+       
         this.draw();
     }
 
@@ -545,6 +620,8 @@ const planets = [];
 let powerup;
 const player = new Player();
 const endGame = new EndGame();
+const startGame = new StartGame();
+const pressStart = new PressStart();
 const projectiles = [];
 const grids = [];
 const invaderProjectiles = [];
@@ -604,6 +681,7 @@ let doubleShot = false;
 let shotCount = 0;
 let shotHit = 0;
 let shotMiss = 0;
+let startScreen = true;
 
 highScore = localStorage.getItem(localStorageName) == null ? 0 :
     localStorage.getItem(localStorageName);
@@ -726,6 +804,12 @@ function calcEndgame() {
     highScoreEl.innerHTML = highScore;
 }
 
+function startScreenUpdate() {
+    startGame.update();
+}
+
+
+
 function animate() {
 
     if (!game.active) {
@@ -736,342 +820,358 @@ function animate() {
         endGame.update();
         return;
     }
+       
+        //level Progression
+        if (score <= 5000) {
+            ProjectileVelocity = 1;
+            enemySpeed = 1;
+            enemySpawn = 1500;
+            enemyLaserColor = 'yellow';
+            enemySprite = './assets/invader.png';
+            if (!executed) {
+                starColor = 'white';
+                stars(starColor, 75);
+                executed = true;
+            }
+            if (!music.playing() && !explosionEnd.playing()) {
+                music.play();
+                music.volume(0.75);
+            }
 
-    //level Progression
-    if (score <= 5000) {
-        ProjectileVelocity = 1;
-        enemySpeed = 1;
-        enemySpawn = 1500;
-        enemyLaserColor = 'yellow';
-        enemySprite = './assets/invader.png';
-        if (!executed) {
-            starColor = 'white';
-            stars(starColor, 75);
-            executed = true;
-        }
-        if (!music.playing() && !explosionEnd.playing()) {
-            music.play();
-            music.volume(0.75);
-        }
+        } else if (score > 5000 && score <= 12000) {
+            planetSprite = './assets/planet02.png';
+            ProjectileVelocity = 2;
+            enemySpeed = 1.5;
+            enemySpawn = 1500;
+            level = 2;
+            levelEl.innerHTML = level;
+            enemySprite = './assets/alienEmoji.png';
+            particleColor = '#5f7b7c';
+            enemyLaserColor = 'yellow';
+            if (executed) {
+                starColor = 'white';
+                stars(starColor, 25);
+                executed = false;
+            }
 
-    } else if (score > 5000 && score <= 12000) {
-        planetSprite = './assets/planet02.png';
-        ProjectileVelocity = 2;
-        enemySpeed = 1.5;
-        enemySpawn = 1500;
-        level = 2;
-        levelEl.innerHTML = level;
-        enemySprite = './assets/alienEmoji.png';
-        particleColor = '#5f7b7c';
-        enemyLaserColor = 'yellow';
-        if (executed) {
-            starColor = 'white';
-            stars(starColor, 25);
-            executed = false;
-        }
+        } else if (score > 12000 && score <= 20000) {
+            planetSprite = './assets/planet03.png';
+            ProjectileVelocity = 2;
+            enemySpeed = 2;
+            enemySpawn = 1000;
+            level = 3;
+            levelEl.innerHTML = level;
+            enemyLaserColor = 'yellow';
+            particleColor = '#b8b8b8';
+            enemySprite = './assets/skullEmoji.png';
+            if (!executed) {
+                starColor = '#8f5cd1';
+                stars(starColor, 50);
+                executed = true;
+            }
+            if (!music02.playing()) {
+                music.stop();
+                music02.play();
+                music02.volume(0.75);
+            }
 
-    } else if (score > 12000 && score <= 20000) {
-        planetSprite = './assets/planet03.png';
-        ProjectileVelocity = 2;
-        enemySpeed = 2;
-        enemySpawn = 1000;
-        level = 3;
-        levelEl.innerHTML = level;
-        enemyLaserColor = 'yellow';
-        particleColor = '#b8b8b8';
-        enemySprite = './assets/skullEmoji.png';
-        if (!executed) {
-            starColor = '#8f5cd1';
-            stars(starColor, 50);
-            executed = true;
-        }
-        if (!music02.playing()) {
-            music.stop();
-            music02.play();
-            music02.volume(0.75);
-        }
+        } else if (score > 20000 && score <= 30000) {
+            planetSprite = './assets/planet05.png';
+            ProjectileVelocity = 3;
+            enemySpeed = 2.5;
+            enemySpawn = 1000;
+            level = 4;
+            levelEl.innerHTML = level;
+            enemySprite = './assets/crazyEmoji.png';
+            particleColor = '#fee7b1';
+            enemyLaserColor = 'orange';
+            if (executed) {
+                starColor = '#e3b354';
+                stars(starColor, 30);
+                executed = false;
+            }
 
-    } else if (score > 20000 && score <= 30000) {
-        planetSprite = './assets/planet05.png';
-        ProjectileVelocity = 3;
-        enemySpeed = 2.5;
-        enemySpawn = 1000;
-        level = 4;
-        levelEl.innerHTML = level;
-        enemySprite = './assets/crazyEmoji.png';
-        particleColor = '#fee7b1';
-        enemyLaserColor = 'orange';
-        if (executed) {
-            starColor = '#e3b354';
-            stars(starColor, 30);
-            executed = false;
-        }
+        } else if (score > 30000 && score <= 50000) {
+            planetSprite = './assets/planet04.png';
+            ProjectileVelocity = 3;
+            enemySpeed = 3;
+            enemySpawn = 1000;
+            level = 5;
+            levelEl.innerHTML = level;
+            enemySprite = './assets/pooEmoji.png';
+            enemyLaserColor = 'orange';
+            particleColor = '#805023'
 
-    } else if (score > 30000 && score <= 50000) {
-        planetSprite = './assets/planet04.png';
-        ProjectileVelocity = 3;
-        enemySpeed = 3;
-        enemySpawn = 1000;
-        level = 5;
-        levelEl.innerHTML = level;
-        enemySprite = './assets/pooEmoji.png';
-        enemyLaserColor = 'orange';
-        particleColor = '#805023'
+        } else if (score > 50000 && score <= 75000) {
+            planetSprite = './assets/planet01.png';
+            ProjectileVelocity = 4;
+            enemySpeed = 3.5;
+            enemySpawn = 500;
+            level = 6;
+            levelEl.innerHTML = level;
+            enemyLaserColor = 'orange';
+            enemySprite = './assets/loveEmoji.png';
+            particleColor = '#805023'
+            if (!music03.playing()) {
+                music02.stop();
+                music03.play();
+                music03.volume(0.75);
+            }
 
-    } else if (score > 50000 && score <= 75000) {
-        planetSprite = './assets/planet01.png';
-        ProjectileVelocity = 4;
-        enemySpeed = 3.5;
-        enemySpawn = 500;
-        level = 6;
-        levelEl.innerHTML = level;
-        enemyLaserColor = 'orange';
-        enemySprite = './assets/loveEmoji.png';
-        particleColor = '#805023'
-        if (!music03.playing()) {
-            music02.stop();
-            music03.play();
-            music03.volume(0.75);
-        }
-
-    } else if (score > 75000 && score <= 100000) {
-        planetSprite = './assets/planet06.png';
-        ProjectileVelocity = 4;
-        enemySpeed = 3.75;
-        enemySpawn = 500;
-        level = 7;
-        levelEl.innerHTML = level;
-        enemyLaserColor = 'green';
-        enemySprite = './assets/sinisterEmoji.png';
-        particleColor = '#d6a8e2'
-        if (!executed) {
-            starColor = '#e3b354';
-            stars(starColor, 25);
-            executed = true;
-        }
-    }
-
-    else if (score > 100000 && score <= 150000) {
-        planetSprite = './assets/planet06.png';
-        ProjectileVelocity = 5;
-        enemySpeed = 4;
-        enemySpawn = 500;
-        level = 8;
-        levelEl.innerHTML = level;
-        enemySprite = './assets/devilEmoji.png';
-        particleColor = '#f08370';
-        enemyLaserColor = 'green';
-
-    } else if (score > 150000 && score <= 200000) {
-        planetSprite = './assets/planet07.png';
-        ProjectileVelocity = 5;
-        enemySpeed = 4.5;
-        enemySpawn = 250;
-        level = 9;
-        levelEl.innerHTML = level;
-        enemySprite = './assets/madEmoji.png';
-        particleColor = '#f8600d';
-        enemyLaserColor = 'green';
-
-    } else if (score > 200000) {
-        planetSprite = './assets/planet08.png';
-        ProjectileVelocity = 5.5;
-        enemySpeed = 4.75;
-        enemySpawn = 250;
-        level = 10;
-        levelEl.innerHTML = level;
-        enemySprite = './assets/motherShip.png';
-        enemyHeight = 30;
-        enemyWidth = 63;
-        particleColor = 'red';
-        enemyLaserColor = 'purple';
-        if (executed) {
-            starColor = '#c70000';
-            stars(starColor, 50);
-            executed = false;
-        }
-        if (!music04.playing()) {
-            music03.stop();
-            music04.play();
-            music04.volume(0.75);
-        }
-    }
-
-    const rot = 0.15;
-    requestAnimationFrame(animate);
-    c.fillStyle = 'black';
-    c.fillRect(0, 0, canvas.width, canvas.height);
-
-    particles.forEach((particle, i) => {
-        if (particle.position.y - particle.radius >= canvas.height) {
-            particle.position.x = Math.random() * canvas.width;
-            particle.position.y = -particle.radius;
-        }
-        if (particle.opacity <= 0) {
-            setTimeout(() => {
-                particles.splice(i, 1);
-            }, 0)
-        } else {
-            particle.update();
-        }
-    })
-    if (planets) {
-        planets.forEach((planet) => {
-            planet.update();
-        })
-    }
-    if (powerup) {
-        powerup.update();
-    }
-    player.update();
-    //player movement and canvas boundry
-    //player.position.x is left side of player
-    if (keys.a.pressed && player.position.x >= 0 && player.position.y <= canvas.height - player.height   //
-        && player.position.y > 0) {
-        player.velocity.x = -speed;
-        player.rotation = -rot;
-
-        //player.position.x + player.width is right side of player
-    } else if (keys.d.pressed && player.position.x + player.width <= canvas.width && //
-        player.position.y <= canvas.height - player.height && player.position.y >= 0) {
-        player.velocity.x = speed;
-        player.rotation = rot;
-    } else if (keys.w.pressed && player.position.y >= 0 && //
-        player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
-        player.velocity.y = -speed;
-    } else if (keys.s.pressed && player.position.y <= canvas.height - player.height - 5 && //
-        player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
-        player.velocity.y = speed;
-    }
-    else {
-        player.velocity.y = 0;
-        player.velocity.x = 0;
-        player.rot = 0;
-    }
-
-    invaderProjectiles.forEach((invaderProjectile, index) => {
-        if (invaderProjectile.position.y + invaderProjectile.height >= canvas.height) {
-            setTimeout(() => {
-                invaderProjectiles.splice(index, 1);
-            }, 0);
-        } else {
-            invaderProjectile.update();
-
-            //Hit Box algorithm for collision detection
-            if (invaderProjectile.position.y + invaderProjectile.height > Math.floor(player.position.y) && invaderProjectile.position.x + invaderProjectile.width > //
-                player.position.x && invaderProjectile.position.x < Math.floor(player.position.x) + player.width && invaderProjectile.position.y < Math.floor(player.position.y) + player.height) {
-                setTimeout(() => {
-                    invaderProjectiles.splice(index, 1);
-                    player.opacity = 0;
-                    game.over = true;
-                    if (!explosionEnd.playing()) {
-                        music.stop();
-                        music02.stop();
-                        music03.stop();
-                        explosionEnd.play();
-                    }
-                }, 0);
-
-                setTimeout(() => {
-                    game.active = false;
-                }, 2000);
-
-                createParticles({
-                    object: player,
-                    color: 'white',
-                    fades: true,
-                    num: 15
-                })
+        } else if (score > 75000 && score <= 100000) {
+            planetSprite = './assets/planet06.png';
+            ProjectileVelocity = 4;
+            enemySpeed = 3.75;
+            enemySpawn = 500;
+            level = 7;
+            levelEl.innerHTML = level;
+            enemyLaserColor = 'green';
+            enemySprite = './assets/sinisterEmoji.png';
+            particleColor = '#d6a8e2'
+            if (!executed) {
+                starColor = '#e3b354';
+                stars(starColor, 25);
+                executed = true;
             }
         }
-    })
-    projectiles.forEach((projectile, index) => {
-        if (projectile.position.y - projectile.height <= 0) {
-            setTimeout(() => {
-                projectiles.splice(index, 1);
-                shotCount++;
-                accuracyEl.innerHTML = calcAccuracy();
-            }, 0);
-        } else {
-            projectile.update();
-        }
-    })
 
-    grids.forEach((grid, gridIndex) => {
-        grid.update();
-        //spawn projectiles
-        if (frames % 100 === 0 && grid.invaders.length > 0) {
-            grid.invaders[Math.floor(Math.random() * grid.invaders.length)].shoot(invaderProjectiles);
-        }
-        grid.invaders.forEach((invader, i) => {
-            invader.update({ velocity: grid.velocity });
+        else if (score > 100000 && score <= 150000) {
+            planetSprite = './assets/planet06.png';
+            ProjectileVelocity = 5;
+            enemySpeed = 4;
+            enemySpawn = 500;
+            level = 8;
+            levelEl.innerHTML = level;
+            enemySprite = './assets/devilEmoji.png';
+            particleColor = '#f08370';
+            enemyLaserColor = 'green';
 
-            //collision detection and enemy removal
-            //projectiles hit enemy
-            projectiles.forEach((projectile, j) => {
-                if (projectile.position.y <= invader.position.y + invader.height && projectile.position.x  //
-                    >= invader.position.x && projectile.position.x <= invader.position.x + invader.width && projectile.position.y //
-                    >= invader.position.y) {
-                    shotCount++;
-                    shotHit++;
+        } else if (score > 150000 && score <= 200000) {
+            planetSprite = './assets/planet07.png';
+            ProjectileVelocity = 5;
+            enemySpeed = 4.5;
+            enemySpawn = 250;
+            level = 9;
+            levelEl.innerHTML = level;
+            enemySprite = './assets/madEmoji.png';
+            particleColor = '#f8600d';
+            enemyLaserColor = 'green';
+
+        } else if (score > 200000) {
+            planetSprite = './assets/planet08.png';
+            ProjectileVelocity = 5.5;
+            enemySpeed = 4.75;
+            enemySpawn = 250;
+            level = 10;
+            levelEl.innerHTML = level;
+            enemySprite = './assets/motherShip.png';
+            enemyHeight = 30;
+            enemyWidth = 63;
+            particleColor = 'red';
+            enemyLaserColor = 'purple';
+            if (executed) {
+                starColor = '#c70000';
+                stars(starColor, 50);
+                executed = false;
+            }
+            if (!music04.playing()) {
+                music03.stop();
+                music04.play();
+                music04.volume(0.75);
+            }
+        }
+
+        const rot = 0.15;
+        
+        
+            requestAnimationFrame(animate);
+        
+        if (startScreen) {
+            requestAnimationFrame(startScreenUpdate);
+        }else if (!startScreen) {
+            startScore.removeAttribute('hidden');
+            highScoreTag.removeAttribute('hidden');
+            levelTag.removeAttribute('hidden');
+            accuracyTag.removeAttribute('hidden');
+        }
+        
+       
+        c.fillStyle = 'black';
+        c.fillRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach((particle, i) => {
+            if (particle.position.y - particle.radius >= canvas.height) {
+                particle.position.x = Math.random() * canvas.width;
+                particle.position.y = -particle.radius;
+            }
+            if (particle.opacity <= 0) {
+                setTimeout(() => {
+                    particles.splice(i, 1);
+                }, 0)
+            } else {
+                particle.update();
+            }
+        })
+        if (!startScreen) {
+            if (planets) {
+                planets.forEach((planet) => {
+                    planet.update();
+                })
+            }
+            if (powerup) {
+                powerup.update();
+            }
+        }
+
+        player.update();
+        //player movement and canvas boundry
+        //player.position.x is left side of player
+        if (keys.a.pressed && player.position.x >= 0 && player.position.y <= canvas.height - player.height   //
+            && player.position.y > 0) {
+            player.velocity.x = -speed;
+            player.rotation = -rot;
+
+            //player.position.x + player.width is right side of player
+        } else if (keys.d.pressed && player.position.x + player.width <= canvas.width && //
+            player.position.y <= canvas.height - player.height && player.position.y >= 0) {
+            player.velocity.x = speed;
+            player.rotation = rot;
+        } else if (keys.w.pressed && player.position.y >= 0 && //
+            player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
+            player.velocity.y = -speed;
+        } else if (keys.s.pressed && player.position.y <= canvas.height - player.height - 5 && //
+            player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
+            player.velocity.y = speed;
+        }
+        else {
+            player.velocity.y = 0;
+            player.velocity.x = 0;
+            player.rot = 0;
+        }
+
+        invaderProjectiles.forEach((invaderProjectile, index) => {
+            if (invaderProjectile.position.y + invaderProjectile.height >= canvas.height) {
+                setTimeout(() => {
+                    invaderProjectiles.splice(index, 1);
+                }, 0);
+            } else {
+                invaderProjectile.update();
+
+                //Hit Box algorithm for collision detection
+                if (invaderProjectile.position.y + invaderProjectile.height > Math.floor(player.position.y) && invaderProjectile.position.x + invaderProjectile.width > //
+                    player.position.x && invaderProjectile.position.x < Math.floor(player.position.x) + player.width && invaderProjectile.position.y < Math.floor(player.position.y) + player.height) {
                     setTimeout(() => {
-                        //check if invader is in parent grid array
-                        const invaderFound = grid.invaders.find(invader2 => {
-                            return invader2 === invader;
-                        })
-                        const projectileFound = projectiles.find(projectile2 => {
-                            return projectile2 === projectile;
-                        })
-                        //remove invader and projectile
-                        if (invaderFound && projectileFound) {
-                            score += 100;
-                            highScoreEl.innerHTML = calcHighScore();
-                            scoreEl.innerHTML = score;
-                            createParticles({
-                                object: invader,
-                                color: particleColor,
-                                fades: true,
-                                num: 15
-                            });
-                            grid.invaders.splice(i, 1);
-                            projectiles.splice(j, 1);
-                            accuracyEl.innerHTML = calcAccuracy();
+                        invaderProjectiles.splice(index, 1);
+                        player.opacity = 0;
+                        game.over = true;
+                        if (!explosionEnd.playing()) {
+                            music.stop();
+                            music02.stop();
+                            music03.stop();
+                            explosionEnd.play();
+                        }
+                    }, 0);
 
-                            if (grid.invaders.length > 0) {
-                                const firstInvader = grid.invaders[0];
-                                const lastInvader = grid.invaders[grid.invaders.length - 1];
+                    setTimeout(() => {
+                        game.active = false;
+                    }, 2000);
 
-                                grid.width = lastInvader.position.x - firstInvader.position.x + lastInvader.width;
-                                grid.height = lastInvader.position.y - firstInvader.position.y + lastInvader.height;
+                    createParticles({
+                        object: player,
+                        color: 'white',
+                        fades: true,
+                        num: 15
+                    })
+                }
+            }
+        })
+        projectiles.forEach((projectile, index) => {
+            if (projectile.position.y - projectile.height <= 0) {
+                setTimeout(() => {
+                    projectiles.splice(index, 1);
+                    shotCount++;
+                    accuracyEl.innerHTML = calcAccuracy();
+                }, 0);
+            } else {
+                projectile.update();
+            }
+        })
+    if (!startScreen) {    
+        grids.forEach((grid, gridIndex) => {
+            grid.update();
+            //spawn projectiles
+            if (frames % 100 === 0 && grid.invaders.length > 0) {
+                grid.invaders[Math.floor(Math.random() * grid.invaders.length)].shoot(invaderProjectiles);
+            }
+            grid.invaders.forEach((invader, i) => {
+                invader.update({ velocity: grid.velocity });
 
-                            } else {
-                                grids.splice(gridIndex, 1)
+                //collision detection and enemy removal
+                //projectiles hit enemy
+                projectiles.forEach((projectile, j) => {
+                    if (projectile.position.y <= invader.position.y + invader.height && projectile.position.x  //
+                        >= invader.position.x && projectile.position.x <= invader.position.x + invader.width && projectile.position.y //
+                        >= invader.position.y) {
+                        shotCount++;
+                        shotHit++;
+                        setTimeout(() => {
+                            //check if invader is in parent grid array
+                            const invaderFound = grid.invaders.find(invader2 => {
+                                return invader2 === invader;
+                            })
+                            const projectileFound = projectiles.find(projectile2 => {
+                                return projectile2 === projectile;
+                            })
+                            //remove invader and projectile
+                            if (invaderFound && projectileFound) {
+                                score += 100;
+                                highScoreEl.innerHTML = calcHighScore();
+                                scoreEl.innerHTML = score;
+                                createParticles({
+                                    object: invader,
+                                    color: particleColor,
+                                    fades: true,
+                                    num: 15
+                                });
+                                grid.invaders.splice(i, 1);
+                                projectiles.splice(j, 1);
+                                accuracyEl.innerHTML = calcAccuracy();
+
+                                if (grid.invaders.length > 0) {
+                                    const firstInvader = grid.invaders[0];
+                                    const lastInvader = grid.invaders[grid.invaders.length - 1];
+
+                                    grid.width = lastInvader.position.x - firstInvader.position.x + lastInvader.width;
+                                    grid.height = lastInvader.position.y - firstInvader.position.y + lastInvader.height;
+
+                                } else {
+                                    grids.splice(gridIndex, 1)
+                                }
+
                             }
 
-                        }
+                        }, 0)
+                    }
+                })
 
-                    }, 0)
-                }
             })
-
         })
-    })
 
+        //randomly spawn invaders
+        if (frames % randomInterval === 0) {
+            grids.push(new Grid());
+            randomInterval = Math.floor((Math.random() * enemySpawn) + 1000);
+            frames = 0;
+        }
 
-    //randomly spawn invaders
-    if (frames % randomInterval === 0) {
-        grids.push(new Grid());
-        randomInterval = Math.floor((Math.random() * enemySpawn) + 1000);
-        frames = 0;
+        frames++;
+    
     }
-
-    frames++;
-
 }
-
-animate();
+    animate();
 
 document.querySelector("#fireButton").addEventListener("click", function () {
+    startScreen = false;
     if (!doubleShot) {
         laserSound.play();
         setTimeout(() => {
@@ -1152,6 +1252,7 @@ function reportOnGamepad() {
             && player.position.y > -5 && !game.over) {
             player.velocity.x = -speed;
             player.rotation = -rot;
+            startScreen = false;
 
         }
 
@@ -1159,19 +1260,19 @@ function reportOnGamepad() {
             player.position.y <= canvas.height - player.height + 5 && player.position.y >= -5 && !game.over) {
             player.velocity.x = speed;
             player.rotation = rot;
+            startScreen = false;
         }
         else if (gp.axes[1] < -0.5 && player.position.y >= -5 && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = -speed;
+            startScreen = false;
 
         }
 
         else if (gp.axes[1] > 0.5 && player.position.y <= canvas.height - player.height && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
-        }
-        else {
-            //player.rotation = 0;
+            startScreen = false;
         }
 
     }
@@ -1179,6 +1280,7 @@ function reportOnGamepad() {
     if (gp.buttons.length > 0) {
 
         if ((gp.buttons[0].pressed || gp.buttons[7].pressed || gp.buttons[5].pressed) && !isPressed && !game.over) {
+            startScreen = false;
             if (!doubleShot) {
                 laserSound.play();
                 setTimeout(() => {
@@ -1244,69 +1346,92 @@ function reportOnGamepad() {
             && player.position.y > -5 && !game.over) {
             player.velocity.x = -speed;
             player.rotation = -rot;
+            startScreen = false;
         }
 
         else if (gp.buttons[15].pressed && player.position.x + player.width <= canvas.width && //
             player.position.y <= canvas.height - player.height + 5 && player.position.y >= -5 && !game.over) {
             player.velocity.x = speed;
             player.rotation = rot;
+            startScreen = false;
         }
 
         else if ((gp.buttons[12].pressed) && player.position.y >= -5 && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = -speed;
+            startScreen = false;
         }
 
         else if (gp.buttons[13].pressed && player.position.y <= canvas.height - player.height && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
+            startScreen = false;
         }
         else if (!(gp.axes[0] < -0.5) && !(gp.axes[0] > 0.5) && !(keys.a.pressed) && !(keys.d.pressed)) {
             player.rotation = 0;
         }
         if (gp.buttons[9].pressed && !isPressedReset) {
+            startScreen = false;
+            if (!game.active) {
+                let reset = document.getElementById("buttonImage");
+                reset.click();
+                isPressedReset = true;
+            }
+        }
+        if (gp.buttons[8].pressed && !isPressedReset) {
             let reset = document.getElementById("buttonImage");
             reset.click();
             isPressedReset = true;
         }
-        if (!gp.buttons[9].pressed) {
+        if (!gp.buttons[8].pressed) {
             isPressedReset = false;
         }
     }
 
 }
 
-
 addEventListener('keydown', ({ key }) => {
     if (game.over) return;
-
     switch (key) {
-
+        case 'Escape':
+            let reset = document.getElementById("buttonImage");
+                reset.click();
+                isPressedReset = true;
+            break;
         case 'a':
+            startScreen = false;
             keys.a.pressed = true;
             break;
         case 'w':
+            startScreen = false;
             keys.w.pressed = true;
             break;
         case 'd':
+            startScreen = false;
             keys.d.pressed = true;
             break;
         case 's':
+            startScreen = false;
             keys.s.pressed = true;
             break;
         case 'A':
+            startScreen = false;
             keys.a.pressed = true;
             break;
         case 'W':
+            startScreen = false;
             keys.w.pressed = true;
             break;
         case 'D':
+            startScreen = false;
             keys.d.pressed = true;
             break;
         case 'S':
+            startScreen = false;
             keys.s.pressed = true;
             break;
         case ' ':
+            startScreen = false;
             if (!keys.space.pressed && !doubleShot) {
                 laserSound.play();
                 setTimeout(() => {
@@ -1406,3 +1531,7 @@ addEventListener('keyup', ({ key }) => {
     }
 
 }) 
+ 
+addEventListener('mousedown', ()=> {
+    startScreen = false;
+})
