@@ -67,9 +67,7 @@ let mute = false;
 let heightRatio = 2.5;
 let widthRatio = 1.53;
 canvas.height = canvas.width * heightRatio;
-//canvas.width = 1200;
 canvas.width = canvas.height * widthRatio;;
-//canvas.height = 665;
 
 class Player {
     constructor() {
@@ -83,7 +81,6 @@ class Player {
         image.src = './assets/ship001.png'
         image.onload = () => {
             this.image = image;
-            //Shrink image and maintain the aspect ratio
             const scale = 1;
             this.width = image.width * scale;
             this.height = image.height * scale;
@@ -102,17 +99,18 @@ class Player {
     draw() {
         //Only draw if image is loaded
         //save snapshot of canvas then translate to center of player
-        c.save();
-        c.globalAlpha = this.opacity;
-        c.translate(player.position.x + player.width / 2, player.position.y + player.height / 2);
+       
+       
+            c.save();
+            c.globalAlpha = this.opacity;
+            c.translate(player.position.x + player.width / 2, player.position.y + player.height / 2);
 
-        c.rotate(this.rotation);
-        //rotate canvas back
-        c.translate(-player.position.x - player.width / 2, -player.position.y - player.height / 2);
-        c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
-
-        c.restore(this.rotation);
-
+            c.rotate(this.rotation);
+            //rotate canvas back
+            c.translate(-player.position.x - player.width / 2, -player.position.y - player.height / 2);
+            c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+            c.restore(this.rotation);
+        
     }
 
     update() {
@@ -441,11 +439,15 @@ class StartGame {
             this.height = image.height * scale;
             this.opacity = 1;
             this.position = {
-                x: canvas.width / 2 - this.width / 2,
-                y: canvas.height / 2 - this.height / 2
+                x: 0,
+                y: 0
             }
         }
         this.image = image;
+        this.position = {
+            x: canvas.width / 2 - this.width / 2,
+            y: canvas.height / 2 - this.height / 2
+        }
     }
 
     draw() {
@@ -480,7 +482,11 @@ class PressStart {
                 y: canvas.height / 2 - this.height / 2 + 50
             }
         }
-        this.image = image;
+            this.image = image;
+            this.position = {
+                x: canvas.width / 2 - this.width / 2,
+                y: canvas.height / 2 - this.height / 2 + 50
+            }
     }
 
     draw() {
@@ -591,9 +597,7 @@ class PowerUp {
 
         if (powerup.position.y + powerup.radius > Math.floor(player.position.y) && powerup.position.x + powerup.radius > //
             player.position.x && powerup.position.x < Math.floor(player.position.x) + player.width && powerup.position.y < Math.floor(player.position.y) + player.height) {
-            console.log("Boom!");
             this.fades = true;
-
             doubleShot = true;
 
             powerUpSound.play();
@@ -612,9 +616,7 @@ setInterval(() => {
 
     createPowerUp();
 
-}, 30000)
-
-
+}, 20000)
 
 const planets = [];
 let powerup;
@@ -626,7 +628,6 @@ const projectiles = [];
 const grids = [];
 const invaderProjectiles = [];
 const particles = [];
-//monitor key strokes
 const keys = {
 
     a: {
@@ -808,8 +809,6 @@ function startScreenUpdate() {
     startGame.update();
 }
 
-
-
 function animate() {
 
     if (!game.active) {
@@ -820,12 +819,11 @@ function animate() {
         endGame.update();
         return;
     }
-       
         //level Progression
         if (score <= 5000) {
             ProjectileVelocity = 1;
-            enemySpeed = 1;
-            enemySpawn = 1500;
+            enemySpeed = 2;
+            enemySpawn = 1000;
             enemyLaserColor = 'yellow';
             enemySprite = './assets/invader.png';
             if (!executed) {
@@ -841,8 +839,8 @@ function animate() {
         } else if (score > 5000 && score <= 12000) {
             planetSprite = './assets/planet02.png';
             ProjectileVelocity = 2;
-            enemySpeed = 1.5;
-            enemySpawn = 1500;
+            enemySpeed = 2;
+            enemySpawn = 1000;
             level = 2;
             levelEl.innerHTML = level;
             enemySprite = './assets/alienEmoji.png';
@@ -859,7 +857,7 @@ function animate() {
             ProjectileVelocity = 2;
             enemySpeed = 2;
             enemySpawn = 1000;
-            level = 3;
+            level = 2;
             levelEl.innerHTML = level;
             enemyLaserColor = 'yellow';
             particleColor = '#b8b8b8';
@@ -878,7 +876,7 @@ function animate() {
         } else if (score > 20000 && score <= 30000) {
             planetSprite = './assets/planet05.png';
             ProjectileVelocity = 3;
-            enemySpeed = 2.5;
+            enemySpeed = 3;
             enemySpawn = 1000;
             level = 4;
             levelEl.innerHTML = level;
@@ -901,11 +899,16 @@ function animate() {
             enemySprite = './assets/pooEmoji.png';
             enemyLaserColor = 'orange';
             particleColor = '#805023'
+            if (!executed) {
+                starColor = '#white';
+                stars(starColor, 30);
+                executed = true;
+            }
 
         } else if (score > 50000 && score <= 75000) {
             planetSprite = './assets/planet01.png';
             ProjectileVelocity = 4;
-            enemySpeed = 3.5;
+            enemySpeed = 3;
             enemySpawn = 500;
             level = 6;
             levelEl.innerHTML = level;
@@ -917,11 +920,16 @@ function animate() {
                 music03.play();
                 music03.volume(0.75);
             }
+            if (executed) {
+                starColor = '#8f5cd1';
+                stars(starColor, 30);
+                executed = false;
+            }
 
         } else if (score > 75000 && score <= 100000) {
             planetSprite = './assets/planet06.png';
             ProjectileVelocity = 4;
-            enemySpeed = 3.75;
+            enemySpeed = 4;
             enemySpawn = 500;
             level = 7;
             levelEl.innerHTML = level;
@@ -936,7 +944,7 @@ function animate() {
         }
 
         else if (score > 100000 && score <= 150000) {
-            planetSprite = './assets/planet06.png';
+            planetSprite = './assets/planet01.png';
             ProjectileVelocity = 5;
             enemySpeed = 4;
             enemySpawn = 500;
@@ -945,22 +953,32 @@ function animate() {
             enemySprite = './assets/devilEmoji.png';
             particleColor = '#f08370';
             enemyLaserColor = 'green';
+            if (executed) {
+                starColor = '#e3b354';
+                stars(starColor, 30);
+                executed = false;
+            }
 
         } else if (score > 150000 && score <= 200000) {
             planetSprite = './assets/planet07.png';
             ProjectileVelocity = 5;
-            enemySpeed = 4.5;
+            enemySpeed = 4;
             enemySpawn = 250;
             level = 9;
             levelEl.innerHTML = level;
             enemySprite = './assets/madEmoji.png';
             particleColor = '#f8600d';
             enemyLaserColor = 'green';
+            if (!executed) {
+                starColor = '#c70000';
+                stars(starColor, 30);
+                executed = true;
+            }
 
         } else if (score > 200000) {
             planetSprite = './assets/planet08.png';
             ProjectileVelocity = 5.5;
-            enemySpeed = 4.75;
+            enemySpeed = 5;
             enemySpawn = 250;
             level = 10;
             levelEl.innerHTML = level;
@@ -1022,26 +1040,29 @@ function animate() {
                 powerup.update();
             }
         }
-
         player.update();
         //player movement and canvas boundry
         //player.position.x is left side of player
-        if (keys.a.pressed && player.position.x >= 0 && player.position.y <= canvas.height - player.height   //
-            && player.position.y > 0) {
+        if (keys.a.pressed && player.position.x >= 0 && player.position.y <= canvas.height - player.height //
+            && player.position.y > -5) {
             player.velocity.x = -speed;
+            player.velocity.y = 0;
             player.rotation = -rot;
-
+            
             //player.position.x + player.width is right side of player
         } else if (keys.d.pressed && player.position.x + player.width <= canvas.width && //
-            player.position.y <= canvas.height - player.height && player.position.y >= 0) {
+            player.position.y <= canvas.height - player.height && player.position.y > -5) {      
             player.velocity.x = speed;
+            player.velocity.y = 0;
             player.rotation = rot;
         } else if (keys.w.pressed && player.position.y >= 0 && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
             player.velocity.y = -speed;
+            player.velocity.x = 0;
         } else if (keys.s.pressed && player.position.y <= canvas.height - player.height - 5 && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5) {
             player.velocity.y = speed;
+            player.velocity.x = 0;
         }
         else {
             player.velocity.y = 0;
@@ -1108,6 +1129,7 @@ function animate() {
 
                 //collision detection and enemy removal
                 //projectiles hit enemy
+
                 projectiles.forEach((projectile, j) => {
                     if (projectile.position.y <= invader.position.y + invader.height && projectile.position.x  //
                         >= invader.position.x && projectile.position.x <= invader.position.x + invader.width && projectile.position.y //
@@ -1140,23 +1162,22 @@ function animate() {
                                 if (grid.invaders.length > 0) {
                                     const firstInvader = grid.invaders[0];
                                     const lastInvader = grid.invaders[grid.invaders.length - 1];
-
+                
                                     grid.width = lastInvader.position.x - firstInvader.position.x + lastInvader.width;
                                     grid.height = lastInvader.position.y - firstInvader.position.y + lastInvader.height;
-
+                
                                 } else {
                                     grids.splice(gridIndex, 1)
                                 }
-
+                                
                             }
 
                         }, 0)
                     }
                 })
-
             })
         })
-
+        
         //randomly spawn invaders
         if (frames % randomInterval === 0) {
             grids.push(new Grid());
@@ -1281,6 +1302,7 @@ function reportOnGamepad() {
 
         if ((gp.buttons[0].pressed || gp.buttons[7].pressed || gp.buttons[5].pressed) && !isPressed && !game.over) {
             startScreen = false;
+            
             if (!doubleShot) {
                 laserSound.play();
                 setTimeout(() => {
@@ -1432,6 +1454,7 @@ addEventListener('keydown', ({ key }) => {
             break;
         case ' ':
             startScreen = false;
+            
             if (!keys.space.pressed && !doubleShot) {
                 laserSound.play();
                 setTimeout(() => {
