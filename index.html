@@ -5,40 +5,34 @@
     <link rel="stylesheet" type="text/css" href="index.css">
 </head>
 
-
- 
     <div style="position: relative;">
        
-            <p style="position: absolute; z-index: 10; color: white; left: 10px; top: 30px; margin: 0; 
+        <p hidden id ="score" style="position: absolute; z-index: 10; color: white; left: 10px; top: 30px; margin: 0; 
         font-family: sans-serif; font-size: large;" ><span>Score: </span><span id="scoreEl">0</span></p>
-        <p style="position: absolute; z-index: 10; color: white; left: 10px; top: 10px; margin: 0; 
+        <p hidden id ="highScore" style="position: absolute; z-index: 10; color: white; left: 10px; top: 10px; margin: 0; 
         font-family: sans-serif; font-size: large;" ><span>High Score: </span><span id="highScoreEl">0</span></p>
-        <p style="position: absolute; z-index: 10; color: white; right: 10px; top: 10px; margin: 0; 
+        <p hidden id ="levelTag" style="position: absolute; z-index: 10; color: white; right: 10px; top: 10px; margin: 0; 
         font-family: sans-serif; font-size: large;" ><span>Level: </span><span id="levelEl">1</span></p>
-         <p style="position: absolute; z-index: 10; color: white; right: 10px; top: 30px; margin: 0; 
+         <p hidden id ="accuracyTag" style="position: absolute; z-index: 10; color: white; right: 10px; top: 30px; margin: 0; 
          font-family: sans-serif; font-size: large;" ><span>Accuracy: </span><span id="accuracyEl">0</span></p>
+        <p hidden id="endScore" style="position: absolute; z-index: 10; color: red; align-items: center; left: 390; top: 390px; margin: 0; 
+        font-family: sans-serif; font-size: xx-large;  font-weight: bold" ><span>Score: </span><span id="endScoreEl">0</span></p>
+        <p hidden id="bonus" style="position: absolute; z-index: 10; color: red; align-items: center; left: 350; top: 430px; margin: 0; 
+        font-family: sans-serif; font-size: xx-large; font-weight: bold;" ><span>Accuracy Bonus: </span><span id="bonusEl">0</span></p>
+        <p hidden id="totalScore" style="position: absolute; z-index: 10; color: red; align-items: center; left: 370; top: 470px; margin: 0; 
+        font-family: sans-serif; font-size:xx-large;  font-weight: bold" ><span>Total Score: </span><span id="totalScoreEl">0</span></p>
+        <p hidden id ="highScoreEnd" style="position: absolute; z-index: 10; color: red; left: 370px; top: 510px; margin: 0; 
+        font-family: sans-serif; font-size: xx-large; font-weight: bold" ><span>High Score: </span><span id="highScoreEndEl">0</span></p>
+        <p hidden id ="accuracyEndTag" style="position: absolute; z-index: 10; color: red; left: 310px; top: 550px; margin: 0; 
+        font-family: sans-serif; font-size: xx-large; font-weight: bold" ><span>Accuracy Percentage: </span><span id="accuracyEndEl">0</span></p>
 
-
-        <p hidden id="endScore" style="position: absolute; z-index: 10; color: white; align-items: center; left: 430; top: 400px; margin: 0; 
-        font-family: sans-serif; font-size: large;" ><span>Score: </span><span id="endScoreEl">0</span></p>
-        <p hidden id="bonus" style="position: absolute; z-index: 10; color: white; align-items: center; left: 390; top: 430px; margin: 0; 
-        font-family: sans-serif; font-size: large;" ><span>Accuracy Bonus: </span><span id="bonusEl">0</span></p>
-        <p hidden id="totalScore" style="position: absolute; z-index: 10; color: white; align-items: center; left: 410; top: 460px; margin: 0; 
-        font-family: sans-serif; font-size: large;" ><span>Total Score: </span><span id="totalScoreEl">0</span></p>
-
-
-    
         <canvas id="responsive-canvas"> </canvas>
     
     </div>
 
-  
-
 <input alt="reset button" type="image" src="assets/reset001.png" style= "cursor:crosshair; position: absolute; bottom: 10px; align-items: center;" id="buttonImage" value="Restart Game" >
 <input class="disable-dbl-tap-zoom" alt="fire button" type="image" src="assets/fire.png" style= "cursor:crosshair; position: absolute; bottom: 10px; right: 30px; align-items: center;" id="fireButton" value="Fire" >
 <div id="joyDiv" style="position:absolute; align-items: center; width:75px; height:75px; bottom:20px; left:30px;"></div>
-
-
 
 <footer>
 
@@ -66,7 +60,7 @@
 </script>
 <script type="text/javascript">
     // Create JoyStick object into the DIV 'joyDiv'
-   
+
     var joy = new JoyStick('joyDiv', {
         autoReturnToCenter: false,
     }) ;
@@ -76,29 +70,28 @@
         if (joy.GetY() >= 100  && player.position.y >= -5 && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = -speed;
+            startScreen = false;
 
         }
         else if (joy.GetY() <= -100  && player.position.y <= canvas.height - player.height && //
             player.position.x >= -5 && player.position.x + player.width <= canvas.width + 5 && !game.over) {
             player.velocity.y = speed;
+            startScreen = false;
         }
         else if (joy.GetX() >= 100 && joy.GetY() > -100 && joy.GetY() < 100 && player.position.x + player.width <= canvas.width && //
             player.position.y <= canvas.height - player.height + 5 && player.position.y >= -5 && !game.over) {
             player.velocity.x = speed;
             player.rotation = rot;
+            startScreen = false;
         }
         else if (joy.GetX() <= -100 && joy.GetY() > -100 && joy.GetY() < 100 && player.position.x >= 0 && player.position.y <= canvas.height - player.height + 5  //
             && player.position.y > -5 && !game.over) {
             player.velocity.x = -speed;
             player.rotation = -rot;
-
+            startScreen = false;
         }
        
-
     }, 1);
     
-
-
-
     </script>
 </footer>
